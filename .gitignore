@@ -1,0 +1,45 @@
+# PyCharm / JetBrains
+.python-version
+.idea/
+*.iml
+cmake-build-*/
+out/
+parts/
+
+# Entornos Virtuales (Local)
+.venv/
+venv/
+ENV/
+env/
+bin/
+lib/
+include/
+share/
+pyvenv.cfg
+
+# Python (Archivos temporales y caché)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Variables de entorno (Seguridad)
+.env
+.venv
+*.env
