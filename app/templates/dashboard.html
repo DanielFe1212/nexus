@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Disponibilidad Sedes</title>
+    <style>
+        .table-excel { font-size: 0.85rem; border: 1px solid #dee2e6; }
+        .table-excel th { background-color: #f8f9fa; text-align: center; vertical-align: middle; border: 1px solid #dee2e6; }
+        .header-p { background-color: #e3f2fd !important; } /* Azul claro para Primario */
+        .header-s { background-color: #f1f8e9 !important; } /* Verde claro para Secundario */
+        .header-total { background-color: #fff3e0 !important; } /* Naranja para Combinada */
+    </style>
+</head>
+<body class="p-4 bg-light">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Disponibilidad Sedes</h2>
+            <span class="badge bg-dark">Minutos Totales Mes: {{ minutos_mes }}</span>
+        </div>
+
+        <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
+            <thead>
+                <tr>
+                    <th rowspan="2">Sede</th>
+                    <th colspan="4" class="header-p">CANAL PRIMARIO</th>
+                    <th colspan="4" class="header-s">CANAL SECUNDARIO</th>
+                    <th colspan="3" class="header-total">TOTAL COMBINADA</th>
+                </tr>
+                <tr>
+                    <th class="header-p">Proveedor</th>
+                    <th class="header-p">Min. Caída</th>
+                    <th class="header-p">Disp. %</th>
+                    <th class="header-p">Indisp. %</th>
+                    <th class="header-s">Proveedor</th>
+                    <th class="header-s">Min. Caída</th>
+                    <th class="header-s">Disp. %</th>
+                    <th class="header-s">Indisp. %</th>
+                    <th class="header-total">Disp. 1+1</th>
+                    <th class="header-total">Meta</th>
+                    <th class="header-total">Cumple</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in reporte %}
+                <tr>
+                    <td class="fw-bold">{{ f.sede }}</td>
+                    <td>{{ f.canal_p }}</td>
+                    <td class="text-end">{{ f.min_p }}</td>
+                    <td class="text-end">{{ f.disp_p }}%</td>
+                    <td class="text-end text-muted">{{ f.indisp_p_pct }}%</td>
+                    <td>{{ f.canal_s }}</td>
+                    <td class="text-end">{{ f.min_s }}</td>
+                    <td class="text-end">{{ f.disp_s }}%</td>
+                    <td class="text-end text-muted">{{ f.indisp_s_pct }}%</td>
+                    <td class="text-end fw-bold {% if f.cumple %}text-success{% else %}text-danger{% endif %}">
+                        {{ f.disp_total }}%
+                    </td>
+                    <td class="text-center">{{ f.meta }}%</td>
+                    <td class="text-center">
+                        {% if f.cumple %}
+                            <span class="text-success">✔</span>
+                        {% else %}
+                            <span class="text-danger">✘</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-5">
+    <h3 class="text-secondary mb-3">Disponibilidad por Canal (Proveedor)</h3>
+    <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
+        <thead class="table-secondary text-center">
+            <tr>
+                <th>Proveedor</th>
+                <th>Sedes que lo usan</th>
+                <th>Min. Caída Total</th>
+                <th>Min. Posibles</th>
+                <th>Disponibilidad Canal</th>
+                <th>Indisponibilidad %</th>
+                <th>Meta</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in canales %}
+            <tr>
+                <td class="fw-bold">{{ c.nombre }}</td>
+                <td class="text-center">{{ c.sedes_uso }}</td>
+                <td class="text-end">{{ c.min_caida }}</td>
+                <td class="text-end">{{ c.min_posibles }}</td>
+                <td class="text-end fw-bold">{{ c.disp }}%</td>
+                <td class="text-end text-muted">{{ c.indisp }}%</td>
+                <td class="text-center">{{ meta_global }}%</td>
+                <td class="text-center">
+                    {% if c.cumple %}
+                        <span class="text-success fw-bold">✔</span>
+                    {% else %}
+                        <span class="text-danger fw-bold">✘</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</body>
+</html>
