@@ -70,19 +70,26 @@ class TipoFalla(models.Model):
         return self.nombre
 
 
+from django.db import models
+from django.core.exceptions import ValidationError
+
+
 class Evento(models.Model):
     idevento = models.AutoField(primary_key=True)
-    idsede = models.ForeignKey(Sede, on_delete=models.CASCADE)
-    idproveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    idsede = models.ForeignKey(Sede, on_delete=models.CASCADE, verbose_name="Sede")
+    idproveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, verbose_name="Proveedor")
     idtipo_falla = models.ForeignKey(TipoFalla, on_delete=models.SET_NULL, null=True, verbose_name="Causa de Falla")
 
-    fecha_inicio = models.DateTimeField()
-    fecha_fin = models.DateTimeField(null=True, blank=True)
+    # Rol automático
+    rol = models.CharField(max_length=20, editable=False, null=True, blank=True)
+
+    fecha_inicio = models.DateTimeField(verbose_name="Fecha Inicio")
+    fecha_fin = models.DateTimeField(null=True, blank=True, verbose_name="Fecha Fin")
     comentarios = models.TextField(blank=True, null=True)
 
-    # Columnas físicas para cálculos rápidos (Dashboard)
-    duracion_minutos = models.IntegerField(null=True, blank=True, editable=False)
-    duracion_horas = models.FloatField(null=True, blank=True, editable=False)
+    # ESTOS VAN AQUÍ (FUERA DE META)
+    duracion_minutos = models.IntegerField(null=True, blank=True, editable=False, verbose_name="Minutos")
+    duracion_horas = models.FloatField(null=True, blank=True, editable=False, verbose_name="Horas")
 
     @property
     def periodo(self):
@@ -93,13 +100,23 @@ class Evento(models.Model):
     class Meta:
         verbose_name = "Evento"
         verbose_name_plural = "Eventos"
+        # En Meta solo dejamos índices y nombres de la tabla
         indexes = [
             models.Index(fields=['idsede'], name='idx_eventos_sede'),
             models.Index(fields=['fecha_inicio'], name='idx_eventos_fecha'),
         ]
 
     def save(self, *args, **kwargs):
-        # Cálculo automático de duración al guardar
+        # Lógica de ROL automático
+        if self.idsede and self.idproveedor:
+            if self.idproveedor == self.idsede.canal_primario:
+                self.rol = "Principal"
+            elif self.idproveedor == self.idsede.canal_secundario:
+                self.rol = "Respaldo"
+            else:
+                self.rol = "Otro"
+
+        # Lógica de DURACIÓN
         if self.fecha_inicio and self.fecha_fin:
             if self.fecha_fin < self.fecha_inicio:
                 raise ValidationError("La fecha de fin no puede ser anterior a la de inicio.")
@@ -111,11 +128,8 @@ class Evento(models.Model):
         else:
             self.duracion_minutos = None
             self.duracion_horas = None
+
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Falla {self.idsede.nombre} - {self.idproveedor.nombre} ({self.periodo})"
-
 
 class ConfiguracionGlobal(models.Model):
     # Punto C: Parámetros del sistema
