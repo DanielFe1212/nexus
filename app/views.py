@@ -1,11 +1,20 @@
 from django.shortcuts import render
 from django.utils import timezone
-from django.db import models
 from django.db.models import Q
 from datetime import datetime
 import calendar
 
 from .models import Sede, Evento, ConfiguracionGlobal, Proveedor
+
+
+# ---> NUEVO: Función auxiliar agregada para la matriz histórica
+def restar_meses(anio, mes, meses_a_restar):
+    nuevo_mes = mes - meses_a_restar
+    nuevo_anio = anio
+    while nuevo_mes <= 0:
+        nuevo_mes += 12
+        nuevo_anio -= 1
+    return nuevo_anio, nuevo_mes
 
 
 def dashboard_kpi(request):
@@ -135,11 +144,57 @@ def dashboard_kpi(request):
                 'cumple': cumple_canal
             })
 
+    # ==========================================
+    # ---> NUEVO: TABLA 3: MATRIZ HISTÓRICA POR PROVEEDOR
+    # ==========================================
+    meses_historial = []
+
+    for i in range(5, -1, -1):  # Calcula desde hace 5 meses hasta el mes actual
+        a_h, m_h = restar_meses(anio, mes, i)
+
+        _, ult_dia = calendar.monthrange(a_h, m_h)
+        p_dia_m = timezone.make_aware(datetime(a_h, m_h, 1), tz)
+        u_dia_m = timezone.make_aware(datetime(a_h, m_h, ult_dia, 23, 59, 59), tz)
+        min_mes_t = ult_dia * minutos_dia
+
+        datos_mes = {
+            'nombre': f"{calendar.month_name[m_h][:3].upper()} {a_h}",
+            'valores_prov': []
+        }
+
+        for prov in proveedores:
+            sedes_uso = Sede.objects.filter(Q(canal_primario=prov) | Q(canal_secundario=prov)).distinct().count()
+
+            if sedes_uso > 0:
+                min_pos_g = sedes_uso * min_mes_t
+                eventos = Evento.objects.filter(
+                    Q(idproveedor=prov) & Q(fecha_inicio__lte=u_dia_m) &
+                    (Q(fecha_fin__gte=p_dia_m) | Q(fecha_fin__isnull=True))
+                )
+
+                caida = 0
+                for ev in eventos:
+                    ini = max(ev.fecha_inicio, p_dia_m)
+                    fin = min(ev.fecha_fin, u_dia_m) if ev.fecha_fin else min(timezone.now(), u_dia_m)
+                    if ini < fin:
+                        caida += int((fin - ini).total_seconds() / 60)
+
+                disp = round((1 - (caida / min_pos_g)) * 100, 2)
+            else:
+                disp = 100.0  # Si no se usa en ese mes, se reporta al 100%
+
+            datos_mes['valores_prov'].append(disp)
+
+        meses_historial.append(datos_mes)
+
+    # ---> NUEVO: Se agregaron 'resumen_historico' y 'lista_proveedores' al final
     return render(request, 'dashboard.html', {
         'reporte': reporte_sedes,
         'canales': reporte_canales,
         'mes_nombre': calendar.month_name[mes].upper(),
         'anio': anio,
         'minutos_mes': minutos_mes_total,
-        'meta_global': meta * 100
+        'meta_global': meta * 100,
+        'resumen_historico': meses_historial,
+        'lista_proveedores': proveedores,
     })

@@ -69,42 +69,70 @@
             </tbody>
         </table>
     </div>
+
     <div class="mt-5">
-    <h3 class="text-secondary mb-3">Disponibilidad por Canal (Proveedor)</h3>
-    <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
-        <thead class="table-secondary text-center">
-            <tr>
-                <th>Proveedor</th>
-                <th>Sedes que lo usan</th>
-                <th>Min. Caída Total</th>
-                <th>Min. Posibles</th>
-                <th>Disponibilidad Canal</th>
-                <th>Indisponibilidad %</th>
-                <th>Meta</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for c in canales %}
-            <tr>
-                <td class="fw-bold">{{ c.nombre }}</td>
-                <td class="text-center">{{ c.sedes_uso }}</td>
-                <td class="text-end">{{ c.min_caida }}</td>
-                <td class="text-end">{{ c.min_posibles }}</td>
-                <td class="text-end fw-bold">{{ c.disp }}%</td>
-                <td class="text-end text-muted">{{ c.indisp }}%</td>
-                <td class="text-center">{{ meta_global }}%</td>
-                <td class="text-center">
-                    {% if c.cumple %}
-                        <span class="text-success fw-bold">✔</span>
-                    {% else %}
-                        <span class="text-danger fw-bold">✘</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <h3 class="text-secondary mb-3">Disponibilidad por Canal (Proveedor)</h3>
+        <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
+            <thead class="table-secondary text-center">
+                <tr>
+                    <th>Proveedor</th>
+                    <th>Sedes que lo usan</th>
+                    <th>Min. Caída Total</th>
+                    <th>Min. Posibles</th>
+                    <th>Disponibilidad Canal</th>
+                    <th>Indisponibilidad %</th>
+                    <th>Meta</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in canales %}
+                <tr>
+                    <td class="fw-bold">{{ c.nombre }}</td>
+                    <td class="text-center">{{ c.sedes_uso }}</td>
+                    <td class="text-end">{{ c.min_caida }}</td>
+                    <td class="text-end">{{ c.min_posibles }}</td>
+                    <td class="text-end fw-bold">{{ c.disp }}%</td>
+                    <td class="text-end text-muted">{{ c.indisp }}%</td>
+                    <td class="text-center">{{ meta_global }}%</td>
+                    <td class="text-center">
+                        {% if c.cumple %}
+                            <span class="text-success fw-bold">✔</span>
+                        {% else %}
+                            <span class="text-danger fw-bold">✘</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
+
+    <div class="mt-5">
+        <h3 class="text-secondary mb-3">Matriz Histórica por Proveedor (KPI)</h3>
+        <table class="table table-bordered table-sm table-excel shadow-sm bg-white text-center">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 150px; vertical-align: middle;">MES</th>
+                    {% for p in lista_proveedores %}
+                        <th style="vertical-align: middle;">{{ p.nombre|upper }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for fila in resumen_historico %}
+                <tr>
+                    <td class="fw-bold bg-light">{{ fila.nombre }}</td>
+                    {% for valor in fila.valores_prov %}
+                    <td class="{% if valor < meta_global %}text-danger fw-bold{% else %}text-success{% endif %}" style="vertical-align: middle;">
+                        {{ valor }}%
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </body>
 </html>
