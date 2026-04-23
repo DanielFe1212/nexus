@@ -16,7 +16,7 @@ def restar_meses(anio, mes, meses_a_restar):
     return nuevo_anio, nuevo_mes
 
 
-# 🔥 NUEVA FUNCIÓN MÁGICA: Agrupa tiempos superpuestos para no sumar caídas dobles
+# 🔥 FUNCIÓN MÁGICA: Agrupa tiempos superpuestos (INTACTA)
 def calcular_minutos_caida_reales(eventos, inicio_periodo, fin_periodo, rol_filtro):
     intervalos = []
     for ev in eventos:
@@ -29,7 +29,6 @@ def calcular_minutos_caida_reales(eventos, inicio_periodo, fin_periodo, rol_filt
     if not intervalos:
         return 0
 
-    # Ordenamos y fusionamos los intervalos de tiempo
     intervalos.sort(key=lambda x: x[0])
     merged = [intervalos[0]]
     for current_start, current_end in intervalos[1:]:
@@ -44,20 +43,35 @@ def calcular_minutos_caida_reales(eventos, inicio_periodo, fin_periodo, rol_filt
 
 def dashboard_kpi(request):
     hoy = timezone.now()
+
+    # =================================================================
+    # 1. BLINDAJE DE PARÁMETROS Y CONTROL DE PESTAÑAS
+    # =================================================================
     mes_raw = request.GET.get('mes')
     anio_raw = request.GET.get('anio')
-    sede_id = request.GET.get('sede_id')
+    sede_id_raw = request.GET.get('sede_id')
 
-    mes = int(mes_raw) if mes_raw and mes_raw.isdigit() else hoy.month
-    anio = int(anio_raw) if anio_raw and anio_raw.isdigit() else hoy.year
+    try:
+        mes = int(mes_raw) if mes_raw else hoy.month
+    except ValueError:
+        mes = hoy.month
 
-    # Validamos sede_id limpiamente
-    if not sede_id:
+    try:
+        anio = int(anio_raw) if anio_raw else hoy.year
+    except ValueError:
+        anio = hoy.year
+
+    try:
+        # Esto capturará el número exacto de la sede (ej. 1, 2, 3, 4)
+        sede_id = int(sede_id_raw) if sede_id_raw else None
+    except ValueError:
         sede_id = None
 
-    # 🔥 LÓGICA DE PESTAÑAS: Si hay una sede en la URL, mantén la pestaña 4 abierta
-    tab_activa = 'individual' if sede_id else 'sedes'
+    tab_activa = 'individual' if 'sede_id' in request.GET else 'sedes'
 
+    # =================================================================
+    # 2. CONFIGURACIÓN DEL MES Y META GLOBAL
+    # =================================================================
     config = ConfiguracionGlobal.objects.first()
     meta = config.meta_disponibilidad if config else 0.99
     minutos_dia = config.minutos_dia if config else 1440
@@ -72,17 +86,16 @@ def dashboard_kpi(request):
     proveedores = Proveedor.objects.all()
 
     # ==========================================
-    # TABLA 1: DISPONIBILIDAD DE SEDES (COMBINADA)
+    # TABLA 1: DISPONIBILIDAD DE SEDES (INTACTA)
     # ==========================================
     reporte_sedes = []
     for sede in sedes:
         eventos_mes = Evento.objects.filter(Q(idsede=sede) & Q(fecha_inicio__lte=ultimo_dia_mes) & (
-                    Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
+                Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
 
         caida_p = calcular_minutos_caida_reales(eventos_mes, primer_dia_mes, ultimo_dia_mes, 'Principal')
         caida_s = calcular_minutos_caida_reales(eventos_mes, primer_dia_mes, ultimo_dia_mes, 'Respaldo')
 
-        # Lógica original combinada
         caida_simultanea = 0
         eventos_p = [(max(ev.fecha_inicio, primer_dia_mes), min(ev.fecha_fin or timezone.now(), ultimo_dia_mes)) for ev
                      in eventos_mes if ev.rol == 'Principal']
@@ -112,7 +125,7 @@ def dashboard_kpi(request):
         })
 
     # ==========================================
-    # TABLA 2: DISPONIBILIDAD GLOBAL POR CANAL
+    # TABLA 2: DISPONIBILIDAD GLOBAL POR CANAL (INTACTA)
     # ==========================================
     reporte_canales = []
     for prov in proveedores:
@@ -121,7 +134,7 @@ def dashboard_kpi(request):
         if conteo_sedes > 0:
             min_posibles_global = conteo_sedes * minutos_mes_total
             eventos_prov = Evento.objects.filter(Q(idproveedor=prov) & Q(fecha_inicio__lte=ultimo_dia_mes) & (
-                        Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
+                    Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
             caida_total_prov = sum(int((min(ev.fecha_fin or timezone.now(), ultimo_dia_mes) - max(ev.fecha_inicio,
                                                                                                   primer_dia_mes)).total_seconds() / 60)
                                    for ev in eventos_prov if
@@ -135,7 +148,7 @@ def dashboard_kpi(request):
             })
 
     # ==========================================
-    # TABLA 3: MATRIZ HISTÓRICA POR PROVEEDOR
+    # TABLA 3: MATRIZ HISTÓRICA POR PROVEEDOR (INTACTA)
     # ==========================================
     meses_historial = []
     for i in range(5, -1, -1):
@@ -151,7 +164,7 @@ def dashboard_kpi(request):
             if sedes_uso > 0:
                 min_pos_g = sedes_uso * min_mes_t
                 eventos = Evento.objects.filter(Q(idproveedor=prov) & Q(fecha_inicio__lte=u_dia_m) & (
-                            Q(fecha_fin__gte=p_dia_m) | Q(fecha_fin__isnull=True)))
+                        Q(fecha_fin__gte=p_dia_m) | Q(fecha_fin__isnull=True)))
                 caida = sum(int((min(ev.fecha_fin or timezone.now(), u_dia_m) - max(ev.fecha_inicio,
                                                                                     p_dia_m)).total_seconds() / 60) for
                             ev in eventos if
@@ -165,7 +178,9 @@ def dashboard_kpi(request):
     # TABLA 4: HISTÓRICO POR SEDE SELECCIONADA
     # ==========================================
     historico_sede = []
-    sede_obj = Sede.objects.filter(id=sede_id).first() if sede_id else sedes.first()
+
+    # 🔥 SOLUCIÓN AQUÍ: Usamos pk=sede_id para garantizar que Django encuentre la sede
+    sede_obj = Sede.objects.filter(pk=sede_id).first() if sede_id else sedes.first()
 
     if sede_obj:
         for i in range(5, -1, -1):
@@ -175,10 +190,10 @@ def dashboard_kpi(request):
             u_h = timezone.make_aware(datetime(a_h, m_h, ult_h, 23, 59, 59), tz)
             m_total_h = ult_h * minutos_dia
 
+            # Calculamos específicamente para esa sede elegida (sede_obj)
             evs_sede = Evento.objects.filter(
                 Q(idsede=sede_obj) & Q(fecha_inicio__lte=u_h) & (Q(fecha_fin__gte=p_h) | Q(fecha_fin__isnull=True)))
 
-            # Usamos la matemática correcta aquí
             caida_p = calcular_minutos_caida_reales(evs_sede, p_h, u_h, 'Principal')
             caida_s = calcular_minutos_caida_reales(evs_sede, p_h, u_h, 'Respaldo')
 
@@ -188,11 +203,21 @@ def dashboard_kpi(request):
                 'disp_s': round((1 - (caida_s / m_total_h)) * 100, 2),
             })
 
+    # ==========================================
+    # 5. ENVÍO DE DATOS AL TEMPLATE
+    # ==========================================
     return render(request, 'dashboard.html', {
-        'reporte': reporte_sedes, 'canales': reporte_canales,
-        'mes_nombre': calendar.month_name[mes].upper(), 'anio': anio,
-        'minutos_mes': minutos_mes_total, 'meta_global': meta * 100,
-        'resumen_historico': meses_historial, 'lista_proveedores': proveedores,
-        'sedes': sedes, 'historico_sede': historico_sede, 'sede_seleccionada': sede_obj,
-        'tab_activa': tab_activa  # Enviamos el dato de dónde dejar el foco
+        'mes': mes,
+        'anio': anio,
+        'mes_nombre': calendar.month_name[mes].upper(),
+        'minutos_mes': minutos_mes_total,
+        'meta_global': meta * 100,
+        'reporte': reporte_sedes,
+        'canales': reporte_canales,
+        'resumen_historico': meses_historial,
+        'lista_proveedores': proveedores,
+        'sedes': sedes,
+        'historico_sede': historico_sede,
+        'sede_seleccionada': sede_obj,
+        'tab_activa': tab_activa
     })

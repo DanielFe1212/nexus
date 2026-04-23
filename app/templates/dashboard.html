@@ -31,7 +31,7 @@
 
         <ul class="nav nav-pills mb-4 shadow-sm bg-white p-2 rounded" id="pills-tab" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link {% if tab_activa == 'sedes' %}active{% endif %}" id="pills-sedes-tab" data-bs-toggle="pill" data-bs-target="#pills-sedes" type="button" role="tab">🏢 Disponibilidad Sedes</button>
+                <button class="nav-link {% if tab_activa != 'individual' %}active{% endif %}" id="pills-sedes-tab" data-bs-toggle="pill" data-bs-target="#pills-sedes" type="button" role="tab">🏢 Disponibilidad Sedes</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link" id="pills-canales-tab" data-bs-toggle="pill" data-bs-target="#pills-canales" type="button" role="tab">🌐 Global Proveedores</button>
@@ -46,7 +46,7 @@
 
         <div class="tab-content" id="pills-tabContent">
 
-            <div class="tab-pane fade {% if tab_activa == 'sedes' %}show active{% endif %}" id="pills-sedes" role="tabpanel">
+            <div class="tab-pane fade {% if tab_activa != 'individual' %}show active{% endif %}" id="pills-sedes" role="tabpanel">
                 <div class="table-responsive">
                     <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
                         <thead>
@@ -115,19 +115,19 @@
 
             <div class="tab-pane fade {% if tab_activa == 'individual' %}show active{% endif %}" id="pills-individual" role="tabpanel">
                 <div class="card p-3 shadow-sm mb-4">
-                    <form method="GET" class="row g-3 align-items-center">
+                    <form method="GET" id="sedeFilterForm" class="row g-3 align-items-center">
                         <div class="col-auto"><label class="fw-bold text-primary">Seleccionar Sede para analizar:</label></div>
                         <div class="col-auto">
-                            <select name="sede_id" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <select name="sede_id" class="form-select form-select-sm" onchange="document.getElementById('sedeFilterForm').submit()">
                                 {% for s in sedes %}
-                                    <option value="{{ s.id }}" {% if sede_seleccionada and s.id == sede_seleccionada.id %}selected{% endif %}>
+                                    <option value="{{ s.pk }}" {% if sede_seleccionada and s.pk == sede_seleccionada.pk %}selected{% endif %}>
                                         {{ s.nombre }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <input type="hidden" name="mes" value="{{ request.GET.mes|default:'' }}">
-                        <input type="hidden" name="anio" value="{{ request.GET.anio|default:'' }}">
+                        <input type="hidden" name="mes" value="{{ mes }}">
+                        <input type="hidden" name="anio" value="{{ anio }}">
                     </form>
                 </div>
 
