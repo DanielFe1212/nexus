@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static 'css/diseno_admin.css' %}">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+{% endblock %}
+
+{% block userlinks %}
+    <a href="/admin/app/dashboard/" style="background-color: #0d6efd; color: white; padding: 6px 12px; border-radius: 5px; font-weight: bold; margin-right: 15px; text-decoration: none; border: 1px solid #0a58ca;">
+        📊 Ir al Dashboard KPi
+    </a>
+    {{ block.super }}
+{% endblock %}

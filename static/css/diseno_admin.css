@@ -1,0 +1,69 @@
+/* =========================================
+   DISEÑO PERSONALIZADO DEL ADMIN DE DJANGO
+   ========================================= */
+
+:root {
+    /* Variables de colores para cambiar todo fácil */
+    --color-barra-superior: #1e293b; /* Azul muy oscuro */
+    --color-textos-barra: #ffffff;   /* Blanco */
+    --color-botones: #0ea5e9;        /* Azul claro moderno */
+    --color-botones-hover: #0284c7;  /* Azul más oscuro al pasar el mouse */
+    --color-fondo-pagina: #f8fafc;   /* Gris super clarito para el fondo */
+}
+
+/* Cambia el fondo de toda la página */
+body {
+    background-color: var(--color-fondo-pagina);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 1. Modificar la barra superior completa */
+#header {
+    background-color: var(--color-barra-superior);
+    color: var(--color-textos-barra);
+    padding: 10px 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* 2. Modificar el título (Logo) de la izquierda */
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: var(--color-textos-barra);
+    font-size: 1.6rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+/* 3. Cambiar el color de los botones de Guardar / Añadir */
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    background-color: var(--color-botones);
+    border-radius: 6px;
+    border: none;
+    font-weight: 600;
+    padding: 8px 15px;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+/* Efecto al pasar el mouse por los botones */
+.button:hover, input[type=submit]:hover {
+    background-color: var(--color-botones-hover);
+    transform: translateY(-2px);
+}
+
+/* 4. Cambiar el color de los textos/enlaces del panel izquierdo */
+a:link, a:visited {
+    color: var(--color-botones);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--color-botones-hover);
+    text-decoration: underline;
+}
+
+/* 5. Suavizar las tablas del administrador */
+#changelist table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
