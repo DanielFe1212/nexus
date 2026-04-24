@@ -19,16 +19,22 @@
 </head>
 <body class="p-4 bg-light">
     <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <a href="/admin/" class="btn btn-outline-secondary fw-bold shadow-sm">
+                &larr; Volver al Admin
+            </a>
             <div>
                 <h2 class="mb-0">Dashboard de Disponibilidad</h2>
-                <p class="text-muted">{{ mes_nombre }} {{ anio }}</p>
-            </div>
-            <div class="d-flex gap-2">
-                <span class="badge bg-dark p-2">SLA Meta: {{ meta_global }}%</span>
-                <span class="badge bg-secondary p-2">Minutos Mes: {{ minutos_mes }}</span>
+                <p class="text-muted mb-0">{{ mes_nombre }} {{ anio }}</p>
             </div>
         </div>
+
+        <div class="d-flex gap-2">
+            <span class="badge bg-dark p-2">SLA Meta: {{ meta_global }}%</span>
+            <span class="badge bg-secondary p-2">Minutos Mes: {{ minutos_mes }}</span>
+        </div>
+    </div>
 
         <ul class="nav nav-pills mb-4 shadow-sm bg-white p-2 rounded" id="pills-tab" role="tablist">
             <li class="nav-item" role="presentation">

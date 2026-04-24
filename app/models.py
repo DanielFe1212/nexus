@@ -151,3 +151,9 @@ class ConfiguracionGlobal(models.Model):
 
     def __str__(self):
         return "Configuración del Sistema"
+
+class EnlaceDashboard(Sede):
+    class Meta:
+        proxy = True  # Esto evita que se cree una tabla en la BD
+        verbose_name = "📊 Ir al Dashboard KPI"
+        verbose_name_plural = "📊 Ir al Dashboard KPI"

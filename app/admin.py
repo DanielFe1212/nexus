@@ -1,5 +1,14 @@
 from django.contrib import admin
 from .models import Empresa, Sede, Proveedor, TipoFalla, Evento, ConfiguracionGlobal
+from django.shortcuts import redirect
+from .models import EnlaceDashboard # Importamos el modelo proxy que creaste
+
+# 🔥 ESTO CREA EL COMPORTAMIENTO DEL BOTÓN
+@admin.register(EnlaceDashboard)
+class EnlaceDashboardAdmin(admin.ModelAdmin):
+    def changelist_view(self, request, extra_context=None):
+        # Al hacer clic en el nombre en el admin, te redirige a tu URL exacta
+        return redirect('/admin/app/dashboard/')
 
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):

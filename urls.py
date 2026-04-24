@@ -19,6 +19,8 @@ from django.urls import path
 from app import views
 
 urlpatterns = [
+    path('admin/app/dashboard/', views.dashboard_kpi, name='dashboard_kpi'),
+
+    # 2. La ruta original del admin (debe ir debajo de la tuya)
     path('admin/', admin.site.urls),
-    path('dashboard/', views.dashboard_kpi, name='dashboard'),
 ]
