@@ -13,6 +13,7 @@
         .nav-pills .nav-link.active { background-color: #0d6efd; color: white; }
         .header-p { background-color: #e3f2fd !important; }
         .header-s { background-color: #f1f8e9 !important; }
+        .header-m { background-color: #f3e5f5 !important; }
         .header-total { background-color: #fff3e0 !important; }
     </style>
 </head>
@@ -37,7 +38,13 @@
                 <button class="nav-link" id="pills-canales-tab" data-bs-toggle="pill" data-bs-target="#pills-canales" type="button" role="tab">🌐 Global Proveedores</button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pills-matriz-tab" data-bs-toggle="pill" data-bs-target="#pills-matriz" type="button" role="tab">📊 Matriz Histórica KPI</button>
+                <button class="nav-link" id="pills-matriz-tab" data-bs-toggle="pill" data-bs-target="#pills-matriz" type="button" role="tab">📊 Matriz Histórica</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-mpls-tab" data-bs-toggle="pill" data-bs-target="#pills-mpls" type="button" role="tab">🖧 Rendimiento MPLS</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="pills-global-mpls-tab" data-bs-toggle="pill" data-bs-target="#pills-global-mpls" type="button" role="tab">🌍 Global Prov. MPLS</button>
             </li>
             <li class="nav-item" role="presentation">
                 <button class="nav-link {% if tab_activa == 'individual' %}active{% endif %}" id="pills-individual-tab" data-bs-toggle="pill" data-bs-target="#pills-individual" type="button" role="tab">📍 Historial por Sede</button>
@@ -113,6 +120,63 @@
                 </table>
             </div>
 
+            <div class="tab-pane fade" id="pills-mpls" role="tabpanel">
+                <h5 class="text-secondary mb-3">🖧 Rendimiento Exclusivo de Enlaces MPLS por Sede</h5>
+                <table class="table table-bordered table-sm table-excel shadow-sm bg-white text-center">
+                    <thead class="header-m">
+                        <tr>
+                            <th>Sede</th>
+                            <th>Proveedor MPLS Asignado</th>
+                            <th>Minutos de Caída</th>
+                            <th>Disponibilidad %</th>
+                            <th>Indisponibilidad %</th>
+                            <th>SLA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in reporte_mpls %}
+                        <tr>
+                            <td class="fw-bold text-start">{{ m.sede }}</td>
+                            <td>{{ m.proveedor }}</td>
+                            <td class="text-end">{{ m.min_caida }}</td>
+                            <td class="text-end fw-bold {% if m.cumple %}text-success{% else %}text-danger{% endif %}">{{ m.disp }}%</td>
+                            <td class="text-end text-muted">{{ m.indisp }}%</td>
+                            <td class="text-center">{% if m.cumple %} ✔ {% else %} ✘ {% endif %}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted fst-italic">Ninguna sede tiene asignado un enlace MPLS actualmente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tab-pane fade" id="pills-global-mpls" role="tabpanel">
+                <h5 class="text-secondary mb-3">🌍 Rendimiento Global de Proveedores Evaluados como MPLS</h5>
+                <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
+                    <thead class="header-m text-center">
+                        <tr><th>Proveedor</th><th>Sedes con MPLS</th><th>Min. Caída Total (Rol MPLS)</th><th>Min. Posibles</th><th>Disponibilidad</th><th>Estado</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for c in canales_mpls %}
+                        <tr>
+                            <td class="fw-bold text-center">{{ c.nombre }}</td>
+                            <td class="text-center">{{ c.sedes_uso }}</td>
+                            <td class="text-end">{{ c.min_caida }}</td>
+                            <td class="text-end">{{ c.min_posibles }}</td>
+                            <td class="text-end fw-bold">{{ c.disp }}%</td>
+                            <td class="text-center">{% if c.cumple %}<span class="text-success fw-bold">CUMPLE ✔</span>{% else %}<span class="text-danger fw-bold">FALLA ✘</span>{% endif %}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted fst-italic">No hay proveedores asignados como MPLS actualmente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
             <div class="tab-pane fade {% if tab_activa == 'individual' %}show active{% endif %}" id="pills-individual" role="tabpanel">
                 <div class="card p-3 shadow-sm mb-4">
                     <form method="GET" id="sedeFilterForm" class="row g-3 align-items-center">
@@ -140,6 +204,9 @@
                                     <th>MES</th>
                                     <th>{{ sede_seleccionada.canal_primario.nombre|default:"SIN PRIMARIO" }} (PRINCIPAL)</th>
                                     <th>{{ sede_seleccionada.canal_secundario.nombre|default:"SIN RESPALDO" }} (RESPALDO)</th>
+                                    {% if sede_seleccionada.canal_mpls %}
+                                    <th class="header-m">{{ sede_seleccionada.canal_mpls.nombre }} (MPLS)</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
@@ -148,6 +215,9 @@
                                     <td class="fw-bold bg-light">{{ h.mes }}</td>
                                     <td class="{% if h.disp_p < meta_global %}text-danger fw-bold{% else %}text-success{% endif %}">{{ h.disp_p }}%</td>
                                     <td class="{% if h.disp_s < meta_global %}text-danger fw-bold{% else %}text-success{% endif %}">{{ h.disp_s }}%</td>
+                                    {% if sede_seleccionada.canal_mpls %}
+                                    <td class="{% if h.disp_m < meta_global %}text-danger fw-bold{% else %}text-success{% endif %}">{{ h.disp_m }}%</td>
+                                    {% endif %}
                                 </tr>
                                 {% endfor %}
                             </tbody>

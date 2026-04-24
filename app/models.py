@@ -49,6 +49,15 @@ class Sede(models.Model):
         verbose_name="Canal Secundario"
     )
 
+    # 🔥 NUEVO: Definimos el canal MPLS para la sede
+    canal_mpls = models.ForeignKey(
+        Proveedor,
+        on_delete=models.PROTECT,
+        related_name='sedes_mpls',
+        null=True, blank=True,
+        verbose_name="Canal MPLS"
+    )
+
     class Meta:
         verbose_name = "Sede"
         verbose_name_plural = "Sedes"
@@ -68,10 +77,6 @@ class TipoFalla(models.Model):
 
     def __str__(self):
         return self.nombre
-
-
-from django.db import models
-from django.core.exceptions import ValidationError
 
 
 class Evento(models.Model):
@@ -113,6 +118,9 @@ class Evento(models.Model):
                 self.rol = "Principal"
             elif self.idproveedor == self.idsede.canal_secundario:
                 self.rol = "Respaldo"
+            # 🔥 NUEVO: Detecta automáticamente si el proveedor es el MPLS de esa sede
+            elif self.idproveedor == self.idsede.canal_mpls:
+                self.rol = "MPLS"
             else:
                 self.rol = "Otro"
 
@@ -130,6 +138,7 @@ class Evento(models.Model):
             self.duracion_horas = None
 
         super().save(*args, **kwargs)
+
 
 class ConfiguracionGlobal(models.Model):
     # Punto C: Parámetros del sistema
