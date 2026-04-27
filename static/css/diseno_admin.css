@@ -42,7 +42,7 @@ body {
 /* Los títulos de los módulos en el menú lateral (Ej: "App", "Autenticación") */
 #nav-sidebar .app-app caption, #nav-sidebar caption {
     background-color: #cbd5e1;
-    color: #334155; 
+    color: #334155;
     font-weight: bold;
     border-radius: 5px; /* Bordes redonditos */
 }
@@ -80,4 +80,31 @@ a:hover {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* 🔥 DESAPARECER POR COMPLETO LAS OPCIONES DE AÑADIR Y MODIFICAR EN EL INICIO */
+td a.addlink,
+td a.changelink,
+td a.viewlink {
+    display: none !important;
+}
+
+/* 🔥 OCULTAR ÍCONOS DE AÑADIR/EDITAR/VER EN LOS CAMPOS DESPLEGABLES (Formularios) */
+a.add-related,
+a.change-related,
+a.view-related,
+a.delete-related {
+    display: none !important;
+}
+
+/* 🔥 OCULTAR LOS ATAJOS FEOS DE FECHA Y HORA DE DJANGO */
+.datetimeshortcuts {
+    display: none !important;
+}
+
+/* Hacer que los cajones de fecha y hora se vean más cliqueables */
+.vDateField, .vTimeField {
+    cursor: pointer !important;
+    border: 1px solid gray !important;
+    background-color: #f8fafc !important; /* Un fondito sutil */
 }

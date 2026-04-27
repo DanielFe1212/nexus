@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import Empresa, Sede, Proveedor, TipoFalla, Evento, ConfiguracionGlobal
 from django.shortcuts import redirect
-from .models import EnlaceDashboard # Importamos el modelo proxy que creaste
+from .models import EnlaceDashboard
 
 # 🔥 ESTO CREA EL COMPORTAMIENTO DEL BOTÓN
 @admin.register(EnlaceDashboard)
@@ -41,7 +41,7 @@ class EventoAdmin(admin.ModelAdmin):
     list_display = (
         'get_empresa',
         'idsede',
-        'idproveedor', # CORREGIDO: antes decía idprovider
+        'idproveedor',
         'rol',
         'fecha_inicio',
         'fecha_fin',
@@ -55,3 +55,23 @@ class EventoAdmin(admin.ModelAdmin):
     def get_empresa(self, obj):
         return obj.idsede.idempresa.nombre
     get_empresa.short_description = 'Empresa'
+
+    class Media:
+        css = {
+            'all': (
+                # Diseño del reloj
+                'https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/jquery-clockpicker.min.css',
+                # 🔥 Diseño del nuevo calendario
+                'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+            )
+        }
+        js = (
+            # Motores necesarios
+            'https://code.jquery.com/jquery-3.6.0.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/jquery-clockpicker.min.js',
+            # 🔥 Motor del calendario y paquete de idioma español
+            'https://cdn.jsdelivr.net/npm/flatpickr',
+            'https://npmcdn.com/flatpickr/dist/l10n/es.js',
+            # Tu archivo maestro que activa todo
+            'js/reloj.js',
+        )
