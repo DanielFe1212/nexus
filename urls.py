@@ -18,6 +18,10 @@ from django.contrib import admin
 from django.urls import path
 from app import views
 
+admin.site.site_header = "Panel KPI Nexus"  # El título principal en la barra azul
+admin.site.site_title = "Admin Nexus"       # El texto que sale en la pestaña del navegador
+admin.site.index_title = "Módulo de Administración" # El subtítulo principal
+
 urlpatterns = [
     path('admin/app/dashboard/', views.dashboard_kpi, name='dashboard_kpi'),
 

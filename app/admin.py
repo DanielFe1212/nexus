@@ -10,6 +10,9 @@ class EnlaceDashboardAdmin(admin.ModelAdmin):
         # Al hacer clic en el nombre en el admin, te redirige a tu URL exacta
         return redirect('/admin/app/dashboard/')
 
+    def has_module_permission(self, request):
+        return False
+
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):
     # Si te da error aquí, cambia 'idempresa' por 'pk'

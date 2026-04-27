@@ -56,7 +56,6 @@ ROOT_URLCONF = 'urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # 🔥 EL CAMBIO ESTÁ AQUÍ (Le agregamos 'app' a la ruta)
         'DIRS': [os.path.join(BASE_DIR, 'app', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -114,9 +113,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-co'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Bogota'
 
 USE_I18N = True
 

@@ -33,6 +33,20 @@ body {
     letter-spacing: 1px;
 }
 
+/* El fondo de toda la barra lateral izquierda */
+#nav-sidebar {
+    background-color: #f1f5f9;
+    border-right: 2px solid #e2e8f0; /* Línea separadora */
+}
+
+/* Los títulos de los módulos en el menú lateral (Ej: "App", "Autenticación") */
+#nav-sidebar .app-app caption, #nav-sidebar caption {
+    background-color: #cbd5e1;
+    color: #334155; 
+    font-weight: bold;
+    border-radius: 5px; /* Bordes redonditos */
+}
+
 /* 3. Cambiar el color de los botones de Guardar / Añadir */
 .button, input[type=submit], input[type=button], .submit-row input, a.button {
     background-color: var(--color-botones);
