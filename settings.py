@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# 1. Asegúrate de que BASE_DIR apunte a la raíz real donde están tus carpetas 'app' y 'static'
+# Si settings.py está dentro de una carpeta 'nexus', usa .parent.parent
 BASE_DIR = Path(__file__).resolve().parent
 
 
@@ -125,8 +126,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+# 2. Configuración limpia de estáticos
+
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'static')
 ]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
