@@ -1,16 +1,45 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/base.html" %}
 {% load static %}
 
 {% block extrastyle %}
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/diseno_admin.css' %}">
-
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22></text></svg>">
 {% endblock %}
 
 {% block userlinks %}
-    <a href="/admin/app/dashboard/" style="background-color: #10b981; color: white; padding: 6px 12px; border-radius: 5px; font-weight: bold; margin-right: 15px; text-decoration: none; border: 1px solid #10b981;">
-        Ir al Dashboard KPi
-    </a>
-    {{ block.super }}
+    {% if user.is_authenticated %}
+        <a href="/admin/app/dashboard/" class="btn-dashboard">Ir al Dashboard KPi</a>
+
+        <div class="user-menu-container">
+            <button id="user-menu-btn" class="user-icon-btn">👤</button>
+            <div id="user-dropdown" class="user-dropdown-content">
+                <a href="/">Ver el sitio</a>
+                <a href="/admin/password_change/">Cambiar contraseña</a>
+
+                <form action="/admin/logout/" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Terminar sesión</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            // Lógica del menú
+            var btn = document.getElementById('user-menu-btn');
+            var menu = document.getElementById('user-dropdown');
+
+            if(btn) {
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+                };
+            }
+
+            window.onclick = function() {
+                if(menu) menu.style.display = 'none';
+            }
+        </script>
+    {% else %}
+        {{ block.super }}
+    {% endif %}
 {% endblock %}

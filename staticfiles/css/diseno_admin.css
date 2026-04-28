@@ -1,48 +1,77 @@
 /* ==========================================================================
-   CONFIGURACIÓN GENERAL Y VARIABLES (Edita aquí para cambiar el estilo)
+   CONFIGURACIÓN DE DEGRADADOS (MODIFICABLE)
    ========================================================================== */
-/* 1. SOBREESCRIBIMOS LAS VARIABLES DE DJANGO PARA QUE USEN TUS COLORES */
+
 :root {
-    /* Tus colores definidos */
-    --color-primary: #0ea5e9;
+    /* Variables base */
+    --color-primary: #10b981;
     --color-primary-hover: #0284c7;
     --color-bg-page: #f8fafc;
     --color-header-bg: #1e293b;
-    --color-header-text: #ffffff;
+    --color-header-text: #000000;
+    --color-black: #000000;
+    --color-table-head: #1e293b;
+    --color-border: #e2e8f0;
+    /* [MODIFICABLE]: Verde claro y blanco */
+    --verde-claro: #10b981;
+    --blanco: #ffffff;
 
-    /* AQUÍ HACEMOS QUE DJANGO USE TUS VARIABLES */
-    --header-bg: var(--color-header-bg) !important;
-    --header-color: var(--color-header-text) !important;
-    --body-bg: var(--color-bg-page) !important;
-    --secondary: var(--color-primary) !important; /* Cambia el azul de Django por el tuyo */
-    --button-bg: var(--color-primary) !important;
+    /* Explicación del gradiente:
+       1. Empieza con blanco hasta el 70%.
+       2. Transiciona al verde claro desde el 70% hasta el 100%.
+    */
+    --gradiente-header: linear-gradient(to right,
+        var(--blanco) 70%,
+        var(--verde-claro) 100%
+    );
+
+    /* Gradiente para el cuerpo (mantenido como tenías) */
+    --gradiente-body: linear-gradient(180deg, #d1fae5, #ffffff);
 }
 
-/* 2. LIMPIEZA DE SELECTORES DUPLICADOS */
-#header {
-    background: var(--header-bg) !important;
-    color: var(--header-color) !important;
-}
-
+/* Fondo general de la página */
 body {
-    background-color: var(--body-bg) !important;
+    background: var(--gradiente-body) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh;
 }
 
-/* 3. LOGO (Forzamos visibilidad) */
-#branding h1 {
-    font-size: 0 !important;
+/* Cabecera con degradado verde claro a blanco */
+#header {
+    background: var(--gradiente-header) !important;
+    /* Ajustamos el color de texto a un tono oscuro para que destaque sobre el blanco dominante */
+    color: #000000 !important;
+    padding: 25px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Ajuste del logo para que contraste bien */
+#branding {
+    display: flex;
+    align-items: center;
     background-image: url('/static/images/GrupoCarval.png') !important;
     background-repeat: no-repeat !important;
     background-position: left center !important;
     background-size: contain !important;
-    height: 40px !important;
-    width: 200px !important;
-    display: block !important;
+    min-width: 220px !important;
+    height: 50px !important;
+    text-indent: -9999px !important;
+}
+
+/* Asegurar que los enlaces superiores sean legibles en el nuevo fondo */
+#user-tools a {
+    color: #065f46 !important; /* Verde oscuro para buen contraste */
+    font-weight: bold;
+}
+
+/* 2. Por si acaso, ocultamos cualquier h1 que pueda existir dentro */
+#branding h1 {
+    display: none !important;
 }
 
 /* Enlaces superiores (Ver sitio, cerrar sesión) */
-#user-tools { color: var(--color-header-text) !important; }
-#user-tools a { color: var(--color-accent-gold) !important; font-weight: bold; }
+#user-tools { color: var(--color-black) !important; }
+#user-tools a { color: var(--color-black) !important; font-weight: bold; }
 #user-tools a:hover { color: var(--color-header-text) !important; }
 
 /* ==========================================================================
@@ -101,8 +130,8 @@ a.add-related, a.change-related, a.view-related, a.delete-related,
 }
 
 .btn-eliminar-custom {
-    background-color: dodgerblue;
-    color: white;
+    background-color: #10b981;
+    color: #ffffff;
     border: none;
     padding: 8px 16px;
     border-radius: 6px;
@@ -112,3 +141,14 @@ a.add-related, a.change-related, a.view-related, a.delete-related,
     transition: background-color 0.3s ease;
 }
 .btn-eliminar-custom:hover { background-color: #b02a37; }
+
+/* Ocultar el selector de tema (icono de sol/luna) */
+.theme-toggle {
+    display: none !important;
+}
+
+/* Opcional: Si el botón está dentro de un contenedor específico,
+   a veces es mejor ocultar el contenedor padre si existe */
+#header .theme-toggle {
+    display: none !important;
+}
