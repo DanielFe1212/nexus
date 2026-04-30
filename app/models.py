@@ -85,8 +85,19 @@ class Evento(models.Model):
     idproveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, verbose_name="Proveedor")
     idtipo_falla = models.ForeignKey(TipoFalla, on_delete=models.SET_NULL, null=True, verbose_name="Causa de Falla")
 
-    # Rol automático
-    rol = models.CharField(max_length=20, editable=False, null=True, blank=True)
+    ROLES_CHOICES = [
+        ('Principal', 'Principal'),
+        ('Respaldo', 'Respaldo'),
+        ('MPLS', 'MPLS'),
+    ]
+
+    rol = models.CharField(
+        max_length=20,
+        choices=ROLES_CHOICES,
+        null=True,
+        blank=True,
+        verbose_name="Rol"
+    )
 
     fecha_inicio = models.DateTimeField(verbose_name="Fecha Inicio")
     fecha_fin = models.DateTimeField(null=True, blank=True, verbose_name="Fecha Fin")
@@ -112,23 +123,21 @@ class Evento(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        # Lógica de ROL automático
-        if self.idsede and self.idproveedor:
-            if self.idproveedor == self.idsede.canal_primario:
+        # Lógica de autodetección mejorada para 3 roles
+        if not self.rol and self.idsede and self.idproveedor:
+            if self.idproveedor == self.idsede.canal_mpls:
+                self.rol = "MPLS"
+            elif self.idproveedor == self.idsede.canal_primario:
                 self.rol = "Principal"
             elif self.idproveedor == self.idsede.canal_secundario:
                 self.rol = "Respaldo"
-            # 🔥 NUEVO: Detecta automáticamente si el proveedor es el MPLS de esa sede
-            elif self.idproveedor == self.idsede.canal_mpls:
-                self.rol = "MPLS"
-            else:
-                self.rol = "Otro"
+            # Si no coincide con ninguno de los 3 de esa sede,
+            # el campo quedará vacío para que tú lo asignes manualmente en el Admin.
 
-        # Lógica de DURACIÓN
+        # Lógica de DURACIÓN (Sin cambios)
         if self.fecha_inicio and self.fecha_fin:
             if self.fecha_fin < self.fecha_inicio:
                 raise ValidationError("La fecha de fin no puede ser anterior a la de inicio.")
-
             delta = self.fecha_fin - self.fecha_inicio
             minutos = int(delta.total_seconds() / 60)
             self.duracion_minutos = minutos
