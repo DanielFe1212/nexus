@@ -47,7 +47,6 @@ class Sede(models.Model):
     """
     MODELO: Sede
     Representa una ubicación física de una Empresa.
-    Contiene la asignación de qué proveedor funge como Primario, Secundario o MPLS.
     """
     idsede = models.AutoField(primary_key=True)
     idempresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='sedes')
@@ -66,6 +65,13 @@ class Sede(models.Model):
     canal_mpls = models.ForeignKey(
         Proveedor, on_delete=models.PROTECT, related_name='sedes_mpls',
         null=True, blank=True, verbose_name="Canal MPLS"
+    )
+
+    # 🔥 LA SOLUCIÓN MÁGICA:
+    nodo_central_mpls = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='sedes_hijas_mpls', verbose_name="Nodo Padre MPLS (Topología Estrella)",
+        help_text="Si esta sede pierde MPLS cuando otra sede principal se cae, selecciona aquí la sede principal."
     )
 
     class Meta:

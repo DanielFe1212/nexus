@@ -130,7 +130,6 @@ def dashboard_kpi(request):
         u_dia_m = timezone.make_aware(datetime(anio_matriz, num_mes, ult_dia, 23, 59, 59), tz)
         min_mes_t = ult_dia * minutos_dia
 
-        # Nombre en español (PUNTO 1)
         nombre_corto = MESES_ESPANOL[num_mes][:3].upper()
         datos_mes = {'nombre': f"{nombre_corto} {anio_matriz}", 'valores_prov': []}
 
@@ -156,7 +155,7 @@ def dashboard_kpi(request):
             sedes_agrupadas[grupo] = []
         sedes_agrupadas[grupo].append(s)
 
-    # --- TABLA 6: HISTÓRICO POR SEDE ---
+    # --- TABLA 6: HISTÓRICO POR SEDE (AHORA HEREDA EVENTOS DEL PADRE) ---
     historico_sede = []
     sede_obj = Sede.objects.filter(pk=sede_id_hist).first() if sede_id_hist else sedes.first()
     if sede_obj:
@@ -166,13 +165,18 @@ def dashboard_kpi(request):
             u_h = timezone.make_aware(datetime(anio_hist, num_mes, ult_dia, 23, 59, 59), tz)
             m_total_h = ult_dia * minutos_dia
 
-            evs_sede = Evento.objects.filter(Q(idsede=sede_obj) & Q(fecha_inicio__lte=u_h) & (Q(fecha_fin__gte=p_h) | Q(fecha_fin__isnull=True)))
+            # 🔥 AQUI SE APLICA LA MAGIA DE LA HERENCIA
+            query_eventos = Q(idsede=sede_obj)
+            if sede_obj.nodo_central_mpls:
+                # Si tiene padre, también traemos las caídas MPLS del padre
+                query_eventos |= Q(idsede=sede_obj.nodo_central_mpls, rol='MPLS')
+
+            evs_sede = Evento.objects.filter(query_eventos & Q(fecha_inicio__lte=u_h) & (Q(fecha_fin__gte=p_h) | Q(fecha_fin__isnull=True)))
 
             caida_p = calcular_minutos_caida_reales(evs_sede, p_h, u_h, 'Principal')
             caida_s = calcular_minutos_caida_reales(evs_sede, p_h, u_h, 'Respaldo')
             caida_m = calcular_minutos_caida_reales(evs_sede, p_h, u_h, 'MPLS')
 
-            # Nombre en español (PUNTO 1)
             nom_mes_es = MESES_ESPANOL[num_mes][:3].upper()
             historico_sede.append({
                 'mes': f"{nom_mes_es} {anio_hist}",
@@ -181,28 +185,45 @@ def dashboard_kpi(request):
                 'disp_m': round((1 - (caida_m / m_total_h)) * 100, 2) if m_total_h > 0 else 100.0,
             })
 
-    # --- TABLAS MPLS ---
+    # --- TABLA 4: RENDIMIENTO MPLS (HEREDADO) ---
     reporte_mpls = []
     for s in sedes.exclude(canal_mpls__isnull=True):
-        evs_mpls = Evento.objects.filter(Q(idsede=s) & Q(fecha_inicio__lte=ultimo_dia_mes) & (Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
+        # 🔥 HERENCIA PARA CADA SEDE EN LA TABLA
+        query_mpls = Q(idsede=s)
+        if s.nodo_central_mpls:
+            query_mpls |= Q(idsede=s.nodo_central_mpls, rol='MPLS')
+
+        evs_mpls = Evento.objects.filter(query_mpls & Q(fecha_inicio__lte=ultimo_dia_mes) & (Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
+
         caida_mpls = calcular_minutos_caida_reales(evs_mpls, primer_dia_mes, ultimo_dia_mes, 'MPLS')
         disp_mpls = round((1 - (caida_mpls / minutos_mes_total)) * 100, 4) if minutos_mes_total > 0 else 100
+
         reporte_mpls.append({'sede': s.nombre, 'proveedor': s.canal_mpls.nombre, 'min_caida': caida_mpls, 'disp': disp_mpls, 'indisp': round(100 - disp_mpls, 4), 'cumple': (disp_mpls / 100) >= meta})
 
+    # --- TABLA 5: GLOBAL PROV. MPLS (CORREGIDO PARA TOPOLOGÍA) ---
     canales_mpls = []
     for prov in proveedores:
         s_mpls = Sede.objects.filter(canal_mpls=prov).distinct()
         if s_mpls.count() > 0:
             m_pos = s_mpls.count() * minutos_mes_total
-            evs = Evento.objects.filter(Q(idproveedor=prov) & Q(rol='MPLS') & Q(fecha_inicio__lte=ultimo_dia_mes) & (Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
-            c = sum(int((min(ev.fecha_fin or timezone.now(), ultimo_dia_mes) - max(ev.fecha_inicio, primer_dia_mes)).total_seconds() / 60) for ev in evs if max(ev.fecha_inicio, primer_dia_mes) < min(ev.fecha_fin or timezone.now(), ultimo_dia_mes))
-            d = (1 - (c / m_pos)) * 100 if m_pos > 0 else 100
-            canales_mpls.append({'nombre': prov.nombre, 'sedes_uso': s_mpls.count(), 'min_caida': c, 'min_posibles': m_pos, 'disp': round(d, 4), 'cumple': (d / 100) >= meta})
+            c_total = 0
+
+            # Sumamos las caídas individuales de cada sede para que cuente el "Efecto dominó"
+            for s in s_mpls:
+                query_mpls_prov = Q(idsede=s)
+                if s.nodo_central_mpls:
+                    query_mpls_prov |= Q(idsede=s.nodo_central_mpls, rol='MPLS')
+
+                evs = Evento.objects.filter(query_mpls_prov & Q(rol='MPLS') & Q(fecha_inicio__lte=ultimo_dia_mes) & (Q(fecha_fin__gte=primer_dia_mes) | Q(fecha_fin__isnull=True)))
+                c_total += calcular_minutos_caida_reales(evs, primer_dia_mes, ultimo_dia_mes, 'MPLS')
+
+            d = (1 - (c_total / m_pos)) * 100 if m_pos > 0 else 100
+            canales_mpls.append({'nombre': prov.nombre, 'sedes_uso': s_mpls.count(), 'min_caida': c_total, 'min_posibles': m_pos, 'disp': round(d, 4), 'cumple': (d / 100) >= meta})
 
     return render(request, 'dashboard.html', {
         'mes_gen': mes_gen,
         'anio_gen': anio_gen,
-        'mes_nombre': MESES_ESPANOL[mes_gen].upper(), # MES EN ESPAÑOL DINÁMICO
+        'mes_nombre': MESES_ESPANOL[mes_gen].upper(),
         'anio_matriz': anio_matriz,
         'anio_hist': anio_hist,
         'sede_obj': sede_obj,
@@ -213,7 +234,7 @@ def dashboard_kpi(request):
         'resumen_historico': meses_historial,
         'lista_proveedores': proveedores,
         'sedes': sedes,
-        'sedes_agrupadas': sedes_agrupadas, # ACORDEÓN
+        'sedes_agrupadas': sedes_agrupadas,
         'historico_sede': historico_sede,
         'reporte_mpls': reporte_mpls,
         'canales_mpls': canales_mpls

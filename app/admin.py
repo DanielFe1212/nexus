@@ -58,6 +58,8 @@ class EventoAdmin(admin.ModelAdmin):
     list_filter = ('idsede__idempresa', 'rol', 'fecha_inicio')
     search_fields = ('idsede__nombre',)
 
+    exclude = ('duracion_horas', 'duracion_minutos')
+
     def get_empresa(self, obj):
         return obj.idsede.idempresa.nombre
     get_empresa.short_description = 'Empresa'
