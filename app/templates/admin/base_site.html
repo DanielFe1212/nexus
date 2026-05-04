@@ -1,5 +1,68 @@
-{% extends "admin/base.html" %}
+{% extends "admin/base_site.html" %}
 {% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
+    <style>
+        /* Ocultamos el filtro por defecto y lo hacemos flotante */
+        #changelist-filter {
+            display: none;
+            position: absolute;
+            right: 0;
+            z-index: 1000;
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        /* Ensanchamos la tabla al 100% de la pantalla */
+        .changelist-form-container { width: 100% !important; }
+
+        /* Diseño del nuevo botón */
+        #btn-toggle-filtros {
+            margin-bottom: 10px;
+            cursor: pointer;
+            background: #417690; /* Color azul institucional de Django */
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        #btn-toggle-filtros:hover { background: #79aec8; }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Buscamos si la pantalla actual tiene un panel de filtros lateral
+            let panelFiltros = document.getElementById('changelist-filter');
+
+            if (panelFiltros) {
+                // Creamos el botón
+                let btn = document.createElement('button');
+                btn.id = 'btn-toggle-filtros';
+                btn.innerHTML = '⚙️ Mostrar/Ocultar Filtros de Búsqueda';
+
+                // Lo insertamos justo arriba de la tabla principal
+                let contenedorTabla = document.getElementById('changelist-form');
+                if(contenedorTabla) {
+                    contenedorTabla.parentNode.insertBefore(btn, contenedorTabla);
+                }
+
+                // Lógica al hacer clic
+                btn.addEventListener('click', function(event) {
+                    event.preventDefault(); // Evita que recargue la página
+                    // Alternar visibilidad
+                    if (panelFiltros.style.display === 'none' || panelFiltros.style.display === '') {
+                        panelFiltros.style.display = 'block';
+                    } else {
+                        panelFiltros.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}
 
 {% block extrastyle %}
     {{ block.super }}

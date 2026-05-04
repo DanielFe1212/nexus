@@ -1,13 +1,23 @@
+"""
+==============================================================================
+ARCHIVO: admin.py
+==============================================================================
+Propósito:
+    Configura y personaliza el panel de administración de Django.
+    Define qué campos se ven en las listas, los filtros laterales y conecta
+    scripts (JavaScript) y hojas de estilo (CSS) externos para mejorar la UI.
+==============================================================================
+"""
+
 from django.contrib import admin
 from .models import Empresa, Sede, Proveedor, TipoFalla, Evento, ConfiguracionGlobal
 from django.shortcuts import redirect
 from .models import EnlaceDashboard
 
-# 🔥 ESTO CREA EL COMPORTAMIENTO DEL BOTÓN
 @admin.register(EnlaceDashboard)
 class EnlaceDashboardAdmin(admin.ModelAdmin):
+    """ Botón de redirección hacia el Dashboard. """
     def changelist_view(self, request, extra_context=None):
-        # Al hacer clic en el nombre en el admin, te redirige a tu URL exacta
         return redirect('/admin/app/dashboard/')
 
     def has_module_permission(self, request):
@@ -15,7 +25,6 @@ class EnlaceDashboardAdmin(admin.ModelAdmin):
 
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):
-    # Si te da error aquí, cambia 'idempresa' por 'pk'
     list_display = ('nombre',)
 
 @admin.register(Proveedor)
@@ -24,7 +33,6 @@ class ProveedorAdmin(admin.ModelAdmin):
 
 @admin.register(TipoFalla)
 class TipoFallaAdmin(admin.ModelAdmin):
-    # Quitamos 'idtipo_falla' y dejamos 'nombre' para ir a lo seguro
     list_display = ('nombre',)
 
 @admin.register(ConfiguracionGlobal)
@@ -38,16 +46,14 @@ class SedeAdmin(admin.ModelAdmin):
 
 @admin.register(Evento)
 class EventoAdmin(admin.ModelAdmin):
+    """
+    Controla la interfaz de registro de caídas y la inyección
+    de calendarios Flatpickr en los campos de fecha.
+    """
     list_display = (
-        'get_empresa',
-        'idsede',
-        'idproveedor',
-        'rol',
-        'fecha_inicio',
-        'fecha_fin',
-        'duracion_horas',
-        'duracion_minutos',
-        'idtipo_falla'
+        'get_empresa', 'idsede', 'idproveedor', 'rol',
+        'fecha_inicio', 'fecha_fin', 'duracion_horas',
+        'duracion_minutos', 'idtipo_falla'
     )
     list_filter = ('idsede__idempresa', 'rol', 'fecha_inicio')
     search_fields = ('idsede__nombre',)
@@ -59,19 +65,14 @@ class EventoAdmin(admin.ModelAdmin):
     class Media:
         css = {
             'all': (
-                # Diseño del reloj
                 'https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/jquery-clockpicker.min.css',
-                # 🔥 Diseño del nuevo calendario
                 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
             )
         }
         js = (
-            # Motores necesarios
             'https://code.jquery.com/jquery-3.6.0.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/jquery-clockpicker.min.js',
-            # 🔥 Motor del calendario y paquete de idioma español
             'https://cdn.jsdelivr.net/npm/flatpickr',
             'https://npmcdn.com/flatpickr/dist/l10n/es.js',
-            # Tu archivo maestro que activa todo
             'js/reloj.js',
         )

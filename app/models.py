@@ -1,8 +1,21 @@
+"""
+==============================================================================
+ARCHIVO: models.py
+==============================================================================
+Propósito:
+    Define la estructura de la base de datos (Modelos/Tablas) usando el ORM de Django.
+    Cada clase representa una tabla en la base de datos y cada atributo una columna.
+==============================================================================
+"""
+
 from django.db import models
 from django.core.exceptions import ValidationError
 
-
 class Empresa(models.Model):
+    """
+    MODELO: Empresa
+    Almacena las diferentes compañías u organizaciones que gestiona el sistema.
+    """
     idempresa = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50, unique=True)
 
@@ -15,6 +28,10 @@ class Empresa(models.Model):
 
 
 class Proveedor(models.Model):
+    """
+    MODELO: Proveedor
+    Almacena los ISP o proveedores de servicios de telecomunicaciones.
+    """
     idproveedor = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50, unique=True)
 
@@ -27,35 +44,28 @@ class Proveedor(models.Model):
 
 
 class Sede(models.Model):
+    """
+    MODELO: Sede
+    Representa una ubicación física de una Empresa.
+    Contiene la asignación de qué proveedor funge como Primario, Secundario o MPLS.
+    """
     idsede = models.AutoField(primary_key=True)
     idempresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='sedes')
     nombre = models.CharField(max_length=50)
     ciudad = models.CharField(max_length=30, blank=True, null=True)
     pais = models.CharField(max_length=30, blank=True, null=True)
 
-    # Mapa de Sedes (Punto A): Definimos la función de los proveedores en esta sede
     canal_primario = models.ForeignKey(
-        Proveedor,
-        on_delete=models.PROTECT,
-        related_name='sedes_primario',
-        null=True, blank=True,
-        verbose_name="Canal Primario"
+        Proveedor, on_delete=models.PROTECT, related_name='sedes_primario',
+        null=True, blank=True, verbose_name="Canal Primario"
     )
     canal_secundario = models.ForeignKey(
-        Proveedor,
-        on_delete=models.PROTECT,
-        related_name='sedes_secundario',
-        null=True, blank=True,
-        verbose_name="Canal Secundario"
+        Proveedor, on_delete=models.PROTECT, related_name='sedes_secundario',
+        null=True, blank=True, verbose_name="Canal Secundario"
     )
-
-    # 🔥 NUEVO: Definimos el canal MPLS para la sede
     canal_mpls = models.ForeignKey(
-        Proveedor,
-        on_delete=models.PROTECT,
-        related_name='sedes_mpls',
-        null=True, blank=True,
-        verbose_name="Canal MPLS"
+        Proveedor, on_delete=models.PROTECT, related_name='sedes_mpls',
+        null=True, blank=True, verbose_name="Canal MPLS"
     )
 
     class Meta:
@@ -67,7 +77,10 @@ class Sede(models.Model):
 
 
 class TipoFalla(models.Model):
-    # Punto B: Tabla gestionable para las causas de los eventos
+    """
+    MODELO: TipoFalla
+    Catálogo de las posibles razones por las que ocurre un evento de indisponibilidad.
+    """
     nombre = models.CharField(max_length=50, unique=True)
     descripcion = models.TextField(blank=True, null=True)
 
@@ -80,61 +93,42 @@ class TipoFalla(models.Model):
 
 
 class Evento(models.Model):
+    """
+    MODELO: Evento
+    Registra las caídas o indisponibilidades de un canal específico en una sede.
+    """
     idevento = models.AutoField(primary_key=True)
-    idsede = models.ForeignKey(Sede, on_delete=models.CASCADE, verbose_name="Sede")
-    idproveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE, verbose_name="Proveedor")
-    idtipo_falla = models.ForeignKey(TipoFalla, on_delete=models.SET_NULL, null=True, verbose_name="Causa de Falla")
+    idsede = models.ForeignKey(Sede, on_delete=models.CASCADE)
+    idproveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
 
-    ROLES_CHOICES = [
-        ('Principal', 'Principal'),
-        ('Respaldo', 'Respaldo'),
-        ('MPLS', 'MPLS'),
-    ]
+    ROL_CHOICES = [('Principal', 'Principal'), ('Respaldo', 'Respaldo'), ('MPLS', 'MPLS')]
+    rol = models.CharField(max_length=20, choices=ROL_CHOICES, blank=True, null=True)
 
-    rol = models.CharField(
-        max_length=20,
-        choices=ROLES_CHOICES,
-        null=True,
-        blank=True,
-        verbose_name="Rol"
-    )
-
-    fecha_inicio = models.DateTimeField(verbose_name="Fecha Inicio")
-    fecha_fin = models.DateTimeField(null=True, blank=True, verbose_name="Fecha Fin")
-    comentarios = models.TextField(blank=True, null=True)
-
-    # ESTOS VAN AQUÍ (FUERA DE META)
-    duracion_minutos = models.IntegerField(null=True, blank=True, editable=False, verbose_name="Minutos")
-    duracion_horas = models.FloatField(null=True, blank=True, editable=False, verbose_name="Horas")
-
-    @property
-    def periodo(self):
-        if self.fecha_inicio:
-            return self.fecha_inicio.strftime("%m/%Y")
-        return None
+    fecha_inicio = models.DateTimeField()
+    fecha_fin = models.DateTimeField(blank=True, null=True)
+    duracion_horas = models.FloatField(blank=True, null=True)
+    duracion_minutos = models.IntegerField(blank=True, null=True)
+    idtipo_falla = models.ForeignKey(TipoFalla, on_delete=models.SET_NULL, null=True, blank=True)
+    ticket_proveedor = models.CharField(max_length=50, blank=True, null=True)
+    observaciones = models.TextField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Evento"
         verbose_name_plural = "Eventos"
-        # En Meta solo dejamos índices y nombres de la tabla
-        indexes = [
-            models.Index(fields=['idsede'], name='idx_eventos_sede'),
-            models.Index(fields=['fecha_inicio'], name='idx_eventos_fecha'),
-        ]
 
     def save(self, *args, **kwargs):
-        # Lógica de autodetección mejorada para 3 roles
-        if not self.rol and self.idsede and self.idproveedor:
-            if self.idproveedor == self.idsede.canal_mpls:
+        """
+        SOBREESCRITURA DE SAVE:
+        Asigna el rol automáticamente y calcula los minutos de duración.
+        """
+        if not self.rol:
+            if self.idsede.canal_mpls and self.idproveedor == self.idsede.canal_mpls:
                 self.rol = "MPLS"
-            elif self.idproveedor == self.idsede.canal_primario:
+            elif self.idsede.canal_primario and self.idproveedor == self.idsede.canal_primario:
                 self.rol = "Principal"
-            elif self.idproveedor == self.idsede.canal_secundario:
+            elif self.idsede.canal_secundario and self.idproveedor == self.idsede.canal_secundario:
                 self.rol = "Respaldo"
-            # Si no coincide con ninguno de los 3 de esa sede,
-            # el campo quedará vacío para que tú lo asignes manualmente en el Admin.
 
-        # Lógica de DURACIÓN (Sin cambios)
         if self.fecha_inicio and self.fecha_fin:
             if self.fecha_fin < self.fecha_inicio:
                 raise ValidationError("La fecha de fin no puede ser anterior a la de inicio.")
@@ -150,7 +144,10 @@ class Evento(models.Model):
 
 
 class ConfiguracionGlobal(models.Model):
-    # Punto C: Parámetros del sistema
+    """
+    MODELO: ConfiguracionGlobal
+    Parámetros base del sistema (SLA Meta).
+    """
     meta_disponibilidad = models.FloatField(default=0.99, help_text="Ejemplo: 0.99 para 99%")
     minutos_dia = models.IntegerField(default=1440, help_text="Minutos en un día (24h = 1440)")
 
@@ -158,11 +155,12 @@ class ConfiguracionGlobal(models.Model):
         verbose_name = "Configuración Global"
         verbose_name_plural = "Configuración Global"
 
-    def __str__(self):
-        return "Configuración del Sistema"
-
-class EnlaceDashboard(Sede):
+class EnlaceDashboard(models.Model):
+    """
+    MODELO FANTASMA: EnlaceDashboard
+    Crea el botón de acceso directo en el panel administrador.
+    """
     class Meta:
-        proxy = True  # Esto evita que se cree una tabla en la BD
-        verbose_name = "Ir al Dashboard KPI"
-        verbose_name_plural = "Ir al Dashboard KPI"
+        verbose_name = " Ver Dashboard Completo"
+        verbose_name_plural = " Ver Dashboard Completo"
+        managed = False
