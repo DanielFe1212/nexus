@@ -31,18 +31,31 @@ class EnlaceDashboardAdmin(admin.ModelAdmin):
 @admin.register(Empresa)
 class EmpresaAdmin(admin.ModelAdmin):
     list_display = ('nombre',)
+    class Media:
+        css = {'all': ('css/custom_admin.css',)}
+        js = ('js/custom_admin.js',)
 
 @admin.register(Proveedor)
 class ProveedorAdmin(admin.ModelAdmin):
     list_display = ('nombre',)
+    class Media:
+        css = {'all': ('css/custom_admin.css',)}
+        js = ('js/custom_admin.js',)
 
 @admin.register(TipoFalla)
 class TipoFallaAdmin(admin.ModelAdmin):
     list_display = ('nombre',)
+    class Media:
+        css = {'all': ('css/custom_admin.css',)}
+        js = ('js/custom_admin.js',)
 
 @admin.register(ConfiguracionGlobal)
 class ConfiguracionAdmin(admin.ModelAdmin):
     list_display = ('meta_disponibilidad', 'minutos_dia')
+
+    class Media:
+        css = {'all': ('css/custom_admin.css',)}
+        js = ('js/custom_admin.js',)
 
 @admin.register(Sede)
 class SedeAdmin(admin.ModelAdmin):
