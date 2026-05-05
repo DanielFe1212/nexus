@@ -1,0 +1,53 @@
+/* 1. MANTENER EL BOTÓN DE AÑADIR SIEMPRE ARRIBA Y VISIBLE */
+.object-tools {
+    position: relative !important;
+    z-index: 100 !important;
+    float: right !important;
+    margin-top: -50px !important; /* Lo sube a la línea del título para que no estorbe */
+}
+
+/* 2. ESTRUCTURA: Tabla completa y Filtros que no empujan */
+#content-main {
+    position: relative !important;
+    display: block !important; /* Volvemos al bloque normal */
+    padding: 20px !important;
+}
+
+#changelist {
+    display: block !important;
+    width: 100% !important; /* La tabla siempre ocupa el 100% */
+}
+
+/* 3. EL PANEL DE FILTROS: Ahora se comporta como una caja lateral fija */
+#changelist-filter {
+    position: absolute !important;
+    right: 20px !important;
+    top: 80px !important;
+    width: 260px !important;
+    background: #ffffff !important;
+    border: 1px solid #d1d1d1 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    z-index: 90 !important;
+    height: auto !important;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* 4. EVITAR QUE LA TABLA SE CORTE POR DEBAJO DE LOS FILTROS */
+/* Le damos un margen derecho a la tabla solo cuando el filtro está presente
+   para que los datos no queden tapados, pero la tabla sigue siendo "completa" */
+#changelist.filtered .results {
+    margin-right: 280px !important;
+}
+
+/* Diseño de la tabla */
+.results table {
+    width: 100% !important;
+    border-radius: 10px !important;
+    border: 1px solid #eee !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
+}
+
+/* Quitar la barra de búsqueda innecesaria de arriba */
+#nav-filter { display: none !important; }

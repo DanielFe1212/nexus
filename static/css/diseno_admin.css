@@ -187,7 +187,7 @@ a.add-related, a.change-related, a.view-related, a.delete-related,
 
 /* Barra vertical desplegable */
 .user-dropdown-content {
-    display: none; /* Se activa con JS */
+    display: none; /* Se activa con js */
     flex-direction: column;
     position: absolute;
     right: 0;

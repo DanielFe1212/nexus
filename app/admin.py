@@ -13,6 +13,11 @@ from django.contrib import admin
 from .models import Empresa, Sede, Proveedor, TipoFalla, Evento, ConfiguracionGlobal
 from django.shortcuts import redirect
 from .models import EnlaceDashboard
+from rangefilter.filters import DateRangeFilter
+
+admin.site.site_header = "Administración Grupo Carval"
+admin.site.site_title = "Admin Carval"
+admin.site.index_title = "Panel de Control - Eventos"
 
 @admin.register(EnlaceDashboard)
 class EnlaceDashboardAdmin(admin.ModelAdmin):
@@ -55,7 +60,11 @@ class EventoAdmin(admin.ModelAdmin):
         'fecha_inicio', 'fecha_fin', 'duracion_horas',
         'duracion_minutos', 'idtipo_falla'
     )
-    list_filter = ('idsede__idempresa', 'rol', 'fecha_inicio')
+    list_filter = (
+        'idsede__idempresa',
+        'rol',
+        ('fecha_inicio', DateRangeFilter),
+    )
     search_fields = ('idsede__nombre',)
 
     exclude = ('duracion_horas', 'duracion_minutos')
@@ -69,6 +78,7 @@ class EventoAdmin(admin.ModelAdmin):
             'all': (
                 'https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/jquery-clockpicker.min.css',
                 'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
+                'css/custom_admin.css',
             )
         }
         js = (
@@ -77,4 +87,5 @@ class EventoAdmin(admin.ModelAdmin):
             'https://cdn.jsdelivr.net/npm/flatpickr',
             'https://npmcdn.com/flatpickr/dist/l10n/es.js',
             'js/reloj.js',
+            'js/custom_admin.js',
         )
