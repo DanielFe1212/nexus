@@ -1,0 +1,128 @@
+/* ==========================================================================
+TABLAS
+========================================================================== */
+
+#changelist table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+#result_list thead th {
+    background-color: var(--color-header-bg);
+    color: white;
+}
+
+#result_list tbody tr:nth-child(odd) {
+    background-color: #f8fafc;
+}
+
+#result_list tbody tr:hover {
+    background-color: #e0f2fe;
+}
+
+/* ==========================================================================
+BOTONES
+========================================================================== */
+
+button,
+.button,
+input[type=submit] {
+    background-color: var(--color-primary);
+    border-radius: 6px;
+    border: none;
+    padding: 8px 14px;
+    color: white;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: var(--color-primary-hover);
+}
+
+/* ==========================================================================
+INPUTS
+========================================================================== */
+
+input, select, textarea {
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 5px;
+    background-color: #ffffff;
+}
+
+/* BARRA DE ACCIONES */
+.actions {
+    background: transparent;
+    padding: 10px 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* BOTÓN ELIMINAR */
+.actions select {
+    display: none; /* oculta dropdown default */
+}
+
+/* BOTÓN personalizado eliminar */
+.btn-eliminar-custom {
+    background-color: #10b981;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+#result_list thead th {
+    background: #1e293b;
+    color: white;
+}
+
+#result_list tbody tr {
+    background: #f1f5f9;
+}
+
+#result_list tbody tr:nth-child(even) {
+    background: #e2e8f0;
+}
+
+/* Oculta dropdown original */
+.actions select {
+    display: none;
+}
+
+/* Oculta botón default */
+.actions button[name="index"] {
+    display: none;
+}
+
+/* BOTÓN PERSONALIZADO */
+.btn-eliminar-custom {
+    background-color: #10b981;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-eliminar-custom:hover {
+    background-color: #059669;
+}
+
+#changelist {
+    display: flex;
+}
+
+#changelist-form {
+    flex: 1;
+}
+
+#changelist-filter {
+    width: 260px;
+    display: block !important;
+}

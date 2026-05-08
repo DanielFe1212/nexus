@@ -1,0 +1,29 @@
+/* ==========================================================================
+CUSTOM POR MODELO (ESCALABLE DRY)
+========================================================================== */
+
+/* EVENTO → acciones a la derecha */
+body.model-evento .actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* SEDE → margen personalizado */
+body.model-sede .actions {
+    margin-left: 20px;
+}
+
+/* EMPRESA → ajustes de posición */
+body.model-empresa .actions {
+    position: relative;
+    top: -5px;
+}
+
+/* ocultar iconos agregar / editar */
+.addlink,
+.changelink,
+a.add-related,
+a.change-related,
+a.viewlink {
+    display: none !important;
+}

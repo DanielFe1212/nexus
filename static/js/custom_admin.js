@@ -1,18 +1,18 @@
-window.onload = function() {
-    // 1. LOGO CLICKEABLE
-    var headerLogo = document.querySelector('#branding h1 a') || document.querySelector('#header a');
-    if (headerLogo) {
-        headerLogo.href = "/";
-        headerLogo.style.cursor = "pointer";
-    }
+document.addEventListener("DOMContentLoaded", function () {
 
-    // 2. MANTENER FILTROS ABIERTOS
-    // Al aplicar un filtro, Django añade la clase 'filtered' al id 'changelist'.
-    // Este script asegura que el contenedor principal sepa que hay filtros activos.
-    var changelist = document.getElementById('changelist');
-    var filterPanel = document.getElementById('changelist-filter');
+    const btn = document.getElementById('user-menu-btn');
+    const menu = document.getElementById('user-dropdown');
 
-    if (filterPanel && changelist) {
-        changelist.classList.add('filtered');
+    if (btn && menu) {
+
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            menu.style.display =
+                menu.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        document.addEventListener("click", function () {
+            menu.style.display = 'none';
+        });
     }
-};
+});

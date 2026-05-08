@@ -10,95 +10,81 @@ Propósito:
 """
 
 from django.contrib import admin
-from .models import Empresa, Sede, Proveedor, TipoFalla, Evento, ConfiguracionGlobal
 from django.shortcuts import redirect
-from .models import EnlaceDashboard
 from rangefilter.filters import DateRangeFilter
+from django.urls import reverse
 
+
+from .models import (
+    Empresa, Sede, Proveedor,
+    TipoFalla, Evento, ConfiguracionGlobal,
+    EnlaceDashboard
+)
+
+# Branding global
 admin.site.site_header = "Administración Grupo Carval"
 admin.site.site_title = "Admin Carval"
 admin.site.index_title = "Panel de Control - Eventos"
 
-@admin.register(EnlaceDashboard)
-class EnlaceDashboardAdmin(admin.ModelAdmin):
-    """ Botón de redirección hacia el Dashboard. """
-    def changelist_view(self, request, extra_context=None):
-        return redirect('/admin/app/dashboard/')
 
-    def has_module_permission(self, request):
-        return False
-
-@admin.register(Empresa)
-class EmpresaAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)
-    class Media:
-        css = {'all': ('css/custom_admin.css',)}
-        js = ('js/custom_admin.js',)
-
-@admin.register(Proveedor)
-class ProveedorAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)
-    class Media:
-        css = {'all': ('css/custom_admin.css',)}
-        js = ('js/custom_admin.js',)
-
-@admin.register(TipoFalla)
-class TipoFallaAdmin(admin.ModelAdmin):
-    list_display = ('nombre',)
-    class Media:
-        css = {'all': ('css/custom_admin.css',)}
-        js = ('js/custom_admin.js',)
-
-@admin.register(ConfiguracionGlobal)
-class ConfiguracionAdmin(admin.ModelAdmin):
-    list_display = ('meta_disponibilidad', 'minutos_dia')
-
-    class Media:
-        css = {'all': ('css/custom_admin.css',)}
-        js = ('js/custom_admin.js',)
-
-@admin.register(Sede)
-class SedeAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'idempresa', 'canal_primario', 'canal_secundario')
-    list_filter = ('idempresa',)
-
-@admin.register(Evento)
-class EventoAdmin(admin.ModelAdmin):
+class BaseNexusAdmin(admin.ModelAdmin):
     """
-    Controla la interfaz de registro de caídas y la inyección
-    de calendarios Flatpickr en los campos de fecha.
+    Base DRY para todos los modelos del admin:
+    - Carga CSS y JS global
+    - Permite extender sin romper layout
     """
-    list_display = (
-        'get_empresa', 'idsede', 'idproveedor', 'rol',
-        'fecha_inicio', 'fecha_fin', 'duracion_horas',
-        'duracion_minutos', 'idtipo_falla'
-    )
-    list_filter = (
-        'idsede__idempresa',
-        'rol',
-        ('fecha_inicio', DateRangeFilter),
-    )
-    search_fields = ('idsede__nombre',)
 
-    exclude = ('duracion_horas', 'duracion_minutos')
-
-    def get_empresa(self, obj):
-        return obj.idsede.idempresa.nombre
-    get_empresa.short_description = 'Empresa'
+    def has_add_permission(self, request, obj=None):
+        return True  # Cambiar a False si quieres quitar el botón de añadir general
 
     class Media:
         css = {
             'all': (
-                'https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/jquery-clockpicker.min.css',
-                'https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css',
-                'css/custom_admin.css',
+                'css/base_admin.css',
+                'css/layout_admin.css',
+                'css/navigation_admin.css',
+                'css/components_admin.css',
+                'css/overrides_admin.css',
             )
         }
         js = (
-            'https://code.jquery.com/jquery-3.6.0.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/clockpicker/0.0.7/jquery-clockpicker.min.js',
-            'https://cdn.jsdelivr.net/npm/flatpickr',
-            'https://npmcdn.com/flatpickr/dist/l10n/es.js',
-            'js/reloj.js',
             'js/custom_admin.js',
+            'js/modulos/boton_eliminar.js',
         )
+
+
+@admin.register(EnlaceDashboard)
+class EnlaceDashboardAdmin(BaseNexusAdmin):
+    def changelist_view(self, request, extra_context=None):
+        return redirect('/admin/app/dashboard/')
+
+
+@admin.register(Empresa, Sede, Proveedor, TipoFalla, ConfiguracionGlobal)
+class GeneralAdmin(BaseNexusAdmin):
+    pass
+
+
+@admin.register(Evento)
+class EventoAdmin(BaseNexusAdmin):
+
+    list_display = (
+        'get_empresa',
+        'idsede',
+        'idproveedor',
+        'rol',
+        'fecha_inicio',
+        'fecha_fin',
+        'duracion_horas',
+        'duracion_minutos',
+        'idtipo_falla'
+    )
+
+    class Media:
+        js = (
+            'js/reloj.js',
+        )
+
+    def get_empresa(self, obj):
+        return obj.idsede.idempresa.nombre if obj.idsede and obj.idsede.idempresa else "-"
+
+    get_empresa.short_description = "Empresa"

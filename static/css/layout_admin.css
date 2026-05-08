@@ -1,0 +1,33 @@
+#container {
+    min-height: 100vh;
+}
+
+/* HEADER */
+#header {
+    background: linear-gradient(90deg, #e5e7eb, #10b981);
+    padding: 15px 25px;
+}
+
+/* BARRA OSCURA */
+.breadcrumbs {
+    background: #2f5d6d;
+    color: white;
+}
+
+/* CONTENIDO */
+#content {
+    background: rgba(255,255,255,0.85);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* SIDEBAR */
+#nav-sidebar {
+    background: #f1f5f9;
+}
+
+#changelist-filter {
+    display: block !important;
+    float: right;
+    width: 260px;
+}

@@ -1,0 +1,12 @@
+/* personalización por tabla */
+body.model-evento .actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* OCULTAR SOLO ICONOS, NO FUNCIONES */
+a.add-related,
+a.change-related,
+a.viewlink {
+    display: none !important;
+}

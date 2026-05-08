@@ -1,0 +1,42 @@
+/* ==========================================================================
+BASE GLOBAL - VARIABLES Y GRADIENTES (CORE DESIGN SYSTEM)
+========================================================================== */
+
+:root {
+    /* COLORES BASE */
+    --color-primary: #10b981;
+    --color-primary-hover: #0284c7;
+    --color-bg-page: #f8fafc;
+    --color-header-bg: #1e293b;
+    --color-header-text: #000000;
+    --color-border: #e2e8f0;
+
+    /* IDENTIDAD */
+    --verde-claro: #10b981;
+    --blanco: #ffffff;
+
+    /* GRADIENTES */
+    --gradiente-header: linear-gradient(90deg, #10b981, #ffffff);
+    --gradiente-body: linear-gradient(180deg, #f8fafc, #ffffff);
+}
+
+/* FONDO GLOBAL */
+body {
+    background: var(--gradiente-body);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background: linear-gradient(180deg, #c7e3d3, #f8fafc) !important;
+    min-height: 100vh;
+}
+
+/* contenedor global */
+#container {
+    background: transparent !important;
+}

@@ -1,0 +1,21 @@
+#changelist-filter {
+    width: 260px;
+    float: right;
+    margin-left: 20px;
+    background: #f8fafc;
+    border-left: 2px solid #10b981;
+}
+
+/* título FILTRO */
+#changelist-filter h2 {
+    background: #2f5d6d;
+    color: white;
+    padding: 5px;
+}
+
+/* botón mostrar filtros */
+#btn-toggle-filtros {
+    background: #e2e8f0;
+    padding: 5px 10px;
+    cursor: pointer;
+}

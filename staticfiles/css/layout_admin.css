@@ -1,0 +1,63 @@
+/* ==========================================================================
+HEADER Y BRANDING (SIN ROMPER DJANGO)
+========================================================================== */
+
+#header {
+    background: var(--gradiente-header);
+    color: var(--color-header-text);
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* LOGO */
+#branding {
+    display: flex;
+    align-items: center;
+}
+
+/* SIDEBAR */
+#nav-sidebar {
+    background-color: #f1f5f9;
+    border-right: 2px solid var(--color-border);
+}
+
+/* CONTENIDO */
+#content {
+    padding: 10px;
+}
+
+#changelist {
+    display: flex;
+    gap: 20px;
+}
+
+/* tabla */
+#changelist-form {
+    flex: 1;
+}
+
+/* filtros */
+#changelist-filter {
+    width: 260px;
+}
+
+#container {
+    background: transparent !important;
+}
+
+/* contenido blanco encima del gradiente */
+#content {
+    background: rgba(255,255,255,0.85);
+    border-radius: 8px;
+}
+
+#header {
+    background: linear-gradient(90deg, #e5e7eb, #10b981);
+    padding: 15px 25px;
+}
+
+/* texto usuario */
+#user-tools {
+    color: black;
+    font-size: 13px;
+}

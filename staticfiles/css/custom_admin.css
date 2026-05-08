@@ -1,0 +1,16 @@
+/**
+ * ARCHIVO: custom_admin.css
+ * ESTADO: Estructura base (Layout cuadrado)
+ */
+
+/* Contenedor principal con margen de respiro */
+#content-main {
+    display: flex !important;
+    flex-direction: inherit !important; /* Filtros a la derecha por defecto */
+    padding: 5px !important;
+}
+
+/* Forzar que todo sea cuadrado (DRY) */
+.results, .results table, .actions, #changelist-filter {
+    border-radius: 0 !important;
+}

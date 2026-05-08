@@ -1,0 +1,123 @@
+/* TABLA */
+#changelist table {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+#result_list thead th {
+    background: #1e293b;
+    color: white;
+}
+
+#result_list tbody tr {
+    background: #f1f5f9;
+}
+
+#result_list tbody tr:nth-child(even) {
+    background: #e2e8f0;
+}
+
+/* ACCIONES (IMPORTANTE) */
+.actions {
+    display: block !important;
+    margin: 10px 0;
+}
+
+/* ocultar default */
+.actions select,
+.actions button[name="index"] {
+    display: none;
+}
+
+/* botón eliminar */
+.btn-eliminar-custom {
+    background-color: #10b981;
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    font-weight: bold;
+}
+
+.btn-eliminar-custom:hover {
+    background-color: #059669;
+}
+
+/* DROPDOWN USUARIO */
+.user-menu-container {
+    position: relative;
+}
+
+.user-icon-btn {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.user-dropdown-content {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: white;
+    border: 2px solid #10b981;
+    border-radius: 10px;
+    padding: 10px;
+    min-width: 200px;
+    z-index: 999;
+}
+
+.user-dropdown-content a,
+.logout-btn {
+    padding: 8px;
+    text-align: left;
+    background: none;
+    border: none;
+    color: #065f46;
+}
+
+.user-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* texto */
+.user-text {
+    font-size: 13px;
+    color: black;
+}
+
+/* botón dashboard */
+.btn-dashboard {
+    background-color: #10b981;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+/* dropdown */
+.user-dropdown-content {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: white;
+    border: 2px solid #10b981;
+    border-radius: 10px;
+    padding: 10px;
+    min-width: 180px;
+}
+
+.user-dropdown-content a,
+.logout-btn {
+    padding: 8px;
+    text-align: left;
+    color: #065f46;
+    border: none;
+    background: none;
+}

@@ -1,108 +1,56 @@
-{% extends "admin/base_site.html" %}
+{% extends "admin/base.html" %}
 {% load static %}
 
-{% block extrahead %}
-    {{ block.super }}
-    <link rel="icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
-    <style>
-        /* Ocultamos el filtro por defecto y lo hacemos flotante */
-        #changelist-filter {
-            display: none;
-            position: absolute;
-            right: 0;
-            z-index: 1000;
-            box-shadow: -5px 5px 15px rgba(0,0,0,0.2);
-            border-radius: 8px;
-        }
-        /* Ensanchamos la tabla al 100% de la pantalla */
-        .changelist-form-container { width: 100% !important; }
-
-        /* Diseño del nuevo botón */
-        #btn-toggle-filtros {
-            margin-bottom: 10px;
-            cursor: pointer;
-            background: #417690; /* Color azul institucional de Django */
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        #btn-toggle-filtros:hover { background: #79aec8; }
-    </style>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Buscamos si la pantalla actual tiene un panel de filtros lateral
-            let panelFiltros = document.getElementById('changelist-filter');
-
-            if (panelFiltros) {
-                // Creamos el botón
-                let btn = document.createElement('button');
-                btn.id = 'btn-toggle-filtros';
-                btn.innerHTML = '⚙️ Mostrar/Ocultar Filtros de Búsqueda';
-
-                // Lo insertamos justo arriba de la tabla principal
-                let contenedorTabla = document.getElementById('changelist-form');
-                if(contenedorTabla) {
-                    contenedorTabla.parentNode.insertBefore(btn, contenedorTabla);
-                }
-
-                // Lógica al hacer clic
-                btn.addEventListener('click', function(event) {
-                    event.preventDefault(); // Evita que recargue la página
-                    // Alternar visibilidad
-                    if (panelFiltros.style.display === 'none' || panelFiltros.style.display === '') {
-                        panelFiltros.style.display = 'block';
-                    } else {
-                        panelFiltros.style.display = 'none';
-                    }
-                });
-            }
-        });
-    </script>
-{% endblock %}
-
 {% block extrastyle %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/diseno_admin.css' %}">
+{{ block.super }}
+
+<link rel="stylesheet" href="{% static 'css/base_admin.css' %}">
+<link rel="stylesheet" href="{% static 'css/layout_admin.css' %}">
+<link rel="stylesheet" href="{% static 'css/navigation_admin.css' %}">
+<link rel="stylesheet" href="{% static 'css/components_admin.css' %}">
+<link rel="stylesheet" href="{% static 'css/overrides_admin.css' %}">
+
 {% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+
+<script src="{% static 'js/custom_admin.js' %}"></script>
+
+{% endblock %}
+
 
 {% block userlinks %}
-    {% if user.is_authenticated %}
-        <a href="/admin/app/dashboard/" class="btn-dashboard">Ir al Dashboard KPi</a>
+<div style="display:flex; align-items:center; gap:10px;">
 
-        <div class="user-menu-container">
-            <button id="user-menu-btn" class="user-icon-btn">👤</button>
-            <div id="user-dropdown" class="user-dropdown-content">
-                <a href="/">Ver el sitio</a>
-                <a href="/admin/password_change/">Cambiar contraseña</a>
+    <span>BIENVENIDO/A, {{ user.username|upper }}.</span>
 
-                <form action="/admin/logout/" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-btn">Terminar sesión</button>
-                </form>
-            </div>
+    <a href="/admin/app/dashboard/" class="btn-dashboard">
+        IR AL DASHBOARD KPI
+    </a>
+
+    <div class="user-menu-container">
+
+        <button id="user-menu-btn" class="user-icon-btn">👤</button>
+
+        <div id="user-dropdown" class="user-dropdown-content">
+
+            <a href="/">VER EL SITIO</a>
+
+            <a href="/admin/password_change/">
+                CAMBIAR CONTRASEÑA
+            </a>
+
+            <form action="/admin/logout/" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">
+                    Terminar sesión
+                </button>
+            </form>
+
         </div>
 
-        <script>
-            // Lógica del menú
-            var btn = document.getElementById('user-menu-btn');
-            var menu = document.getElementById('user-dropdown');
+    </div>
 
-            if(btn) {
-                btn.onclick = function(e) {
-                    e.stopPropagation();
-                    menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
-                };
-            }
-
-            window.onclick = function() {
-                if(menu) menu.style.display = 'none';
-            }
-        </script>
-    {% else %}
-        {{ block.super }}
-    {% endif %}
+</div>
 {% endblock %}

@@ -232,3 +232,36 @@ a.add-related, a.change-related, a.view-related, a.delete-related,
 .user-menu-container:empty {
     display: none !important;
 }
+
+/* ==========================================================================
+   MOVIMIENTO INDEPENDIENTE DE BOTONES (DRY)
+   ========================================================================== */
+
+/* Estilo base para el botón (usa tus colores verdes) */
+.btn-eliminar-custom {
+    background-color: var(--verde-claro) !important;
+    color: white !important;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    display: inline-block;
+}
+
+/* --- TABLA EVENTOS: Botón a la DERECHA --- */
+body.model-evento .actions {
+    display: flex;
+    justify-content: flex-end; /* Lo mueve al final de la barra */
+}
+
+/* --- TABLA SEDES: Botón con MARGEN extra --- */
+body.model-sede .btn-eliminar-custom {
+    margin-left: 50px !important;
+    background-color: #1e293b !important; /* Aquí podrías cambiar el color solo para esta tabla si quisieras */
+}
+
+/* --- TABLA EMPRESA: Mover toda la barra de acciones arriba --- */
+body.model-empresa .actions {
+    position: relative;
+    top: -10px;
+}
