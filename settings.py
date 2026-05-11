@@ -83,7 +83,7 @@ DATABASES = {
         'NAME': 'nexus_db',
         'USER': 'daniel',
         'PASSWORD': '123456', # La que pusiste en el CREATE LOGIN
-        'HOST': 'LSATIAPRENDIZ',
+        'HOST': 'DANIEL',
         'PORT': '',
         'OPTIONS': {
             'driver': 'ODBC Driver 18 for SQL Server',

@@ -3,53 +3,47 @@
 
 {% block extrastyle %}
 {{ block.super }}
-
+{# Meta color-scheme forzado en light antes de cargar cualquier CSS #}
+<meta name="color-scheme" content="light">
+<style>
+    /* Bloqueo inmediato del modo oscuro antes de cargar hojas externas */
+    html { color-scheme: light only !important; }
+</style>
 <link rel="stylesheet" href="{% static 'css/base_admin.css' %}">
 <link rel="stylesheet" href="{% static 'css/layout_admin.css' %}">
 <link rel="stylesheet" href="{% static 'css/navigation_admin.css' %}">
 <link rel="stylesheet" href="{% static 'css/components_admin.css' %}">
 <link rel="stylesheet" href="{% static 'css/overrides_admin.css' %}">
-
 {% endblock %}
 
 {% block extrahead %}
 {{ block.super }}
-
 <script src="{% static 'js/custom_admin.js' %}"></script>
-
 {% endblock %}
-
 
 {% block userlinks %}
 <div style="display:flex; align-items:center; gap:10px;">
 
-    <span>BIENVENIDO/A, {{ user.username|upper }}.</span>
+    <span style="font-size:0.83rem; font-weight:600; color:#000;">
+        BIENVENIDO/A, {{ user.username|upper }}.
+    </span>
 
     <a href="/admin/app/dashboard/" class="btn-dashboard">
         IR AL DASHBOARD KPI
     </a>
 
     <div class="user-menu-container">
-
-        <button id="user-menu-btn" class="user-icon-btn">👤</button>
-
+        <button id="user-menu-btn" class="user-icon-btn" type="button">👤</button>
         <div id="user-dropdown" class="user-dropdown-content">
 
-            <a href="/">VER EL SITIO</a>
+            <a href="/admin/password_change/">CAMBIAR CONTRASEÑA</a>
 
-            <a href="/admin/password_change/">
-                CAMBIAR CONTRASEÑA
-            </a>
-
-            <form action="/admin/logout/" method="post">
+            <form action="/admin/logout/" method="post" style="margin:0;">
                 {% csrf_token %}
-                <button type="submit" class="logout-btn">
-                    Terminar sesión
-                </button>
+                <button type="submit" class="logout-btn">Terminar sesión</button>
             </form>
 
         </div>
-
     </div>
 
 </div>

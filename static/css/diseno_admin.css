@@ -1,267 +1,102 @@
 /* ==========================================================================
-   CONFIGURACIÓN DE DEGRADADOS (MODIFICABLE)
+   DISENO_ADMIN.CSS — LOGIN PAGE OVERRIDES
+   Solo para la página de inicio de sesión.
    ========================================================================== */
 
-:root {
-    /* Variables base */
-    --color-primary: #10b981;
-    --color-primary-hover: #0284c7;
-    --color-bg-page: #f8fafc;
-    --color-header-bg: #1e293b;
-    --color-header-text: #000000;
-    --color-black: #000000;
-    --color-table-head: #1e293b;
-    --color-border: #e2e8f0;
-    /* [MODIFICABLE]: Verde claro y blanco */
-    --verde-claro: #10b981;
-    --blanco: #ffffff;
-
-    /* Explicación del gradiente:
-       1. Empieza con blanco hasta el 70%.
-       2. Transiciona al verde claro desde el 70% hasta el 100%.
-    */
-    --gradiente-header: linear-gradient(to right,
-        var(--blanco) 70%,
-        var(--verde-claro) 100%
-    );
-
-    /* Gradiente para el cuerpo (mantenido como tenías) */
-    --gradiente-body: linear-gradient(180deg, #d1fae5, #ffffff);
+/* Forzar modo claro en login también */
+html, body {
+    background: linear-gradient(180deg, #c7e3d3 0%, #f8fafc 100%) !important;
+    color: #1e293b !important;
+    color-scheme: light !important;
 }
 
-/* Fondo general de la página */
-body {
-    background: var(--gradiente-body) !important;
-    background-attachment: fixed !important;
-    min-height: 100vh;
+@media (prefers-color-scheme: dark) {
+    html, body, #container, #content-main, #login {
+        background: unset !important;
+        color: unset !important;
+    }
 }
 
-/* Cabecera con degradado verde claro a blanco */
-#header {
-    background: var(--gradiente-header) !important;
-    /* Ajustamos el color de texto a un tono oscuro para que destaque sobre el blanco dominante */
-    color: #000000 !important;
-    padding: 25px 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+/* CAJA DE LOGIN — fondo blanco, no verde */
+#login {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10) !important;
+    padding: 28px 32px !important;
+    max-width: 380px;
+    margin: 60px auto;
 }
 
-/* Ajuste del logo para que contraste bien */
-#branding {
-    display: flex;
-    align-items: center;
-    background-image: url('/static/images/GrupoCarval.png') !important;
-    background-repeat: no-repeat !important;
-    background-position: left center !important;
-    background-size: contain !important;
-    min-width: 220px !important;
-    height: 50px !important;
-    text-indent: -9999px !important;
+/* Título "Iniciar sesión" dentro del cuadro */
+#login h1,
+#login .login-title {
+    color: #065f46 !important;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
 }
 
-/* Asegurar que los enlaces superiores sean legibles en el nuevo fondo */
-#user-tools a {
-    color: #065f46 !important; /* Verde oscuro para buen contraste */
-    font-weight: bold;
-}
-
-/* 2. Por si acaso, ocultamos cualquier h1 que pueda existir dentro */
-#branding h1 {
-    display: none !important;
-}
-
-/* Enlaces superiores (Ver sitio, cerrar sesión) */
-#user-tools { color: var(--color-black) !important; }
-#user-tools a { color: var(--color-black) !important; font-weight: bold; }
-#user-tools a:hover { color: var(--color-header-text) !important; }
-
-/* ==========================================================================
-   MÓDULO 2: NAVEGACIÓN Y FILTROS
-   ========================================================================== */
-#nav-sidebar { background-color: #f1f5f9; border-right: 2px solid var(--color-border); }
-
-#nav-sidebar caption { background-color: #cbd5e1; color: #334155; font-weight: bold; border-radius: 5px; }
-
-#changelist-filter { background-color: #ffffff !important; border: 1px solid var(--color-border) !important; }
-#changelist-filter h3 { color: #1e293b !important; border-bottom: 2px solid var(--color-primary) !important; }
-#changelist-filter li.selected a { color: var(--color-primary) !important; border-left: 3px solid var(--color-primary) !important; }
-
-/* ==========================================================================
-   MÓDULO 3: TABLAS Y PAGINACIÓN
-   ========================================================================== */
-#changelist table { border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-
-#result_list thead th { background-color: var(--color-table-head) !important; color: white !important; }
-#result_list tbody tr:nth-child(odd) { background-color: #f8fafc !important; }
-#result_list tbody tr:hover { background-color: #e0f2fe !important; }
-
-.paginator { background-color: #ffffff !important; border-top: 1px solid var(--color-border) !important; }
-.paginator a { color: var(--color-primary) !important; }
-
-/* ==========================================================================
-   MÓDULO 4: FORMULARIOS Y BOTONES
-   ========================================================================== */
-.button, input[type=submit], input[type=button], .submit-row input, a.button {
-    background-color: var(--color-primary);
-    border-radius: 6px;
-    border: none;
-    font-weight: 600;
-    padding: 8px 15px;
-    color: white;
-    transition: all 0.3s ease;
-}
-
-.button:hover, input[type=submit]:hover { background-color: var(--color-primary-hover); transform: translateY(-2px); }
-
-input[type=text], input[type=password], input[type=email], select, textarea {
-    border: 1px solid var(--color-border) !important;
+/* Inputs del login */
+#login input[type="text"],
+#login input[type="password"] {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
     border-radius: 4px !important;
-    padding: 5px !important;
-    background-color: #ffffff !important;
-}
-
-/* ==========================================================================
-   MÓDULO 5: LIMPIEZA DE INTERFAZ (OCULTAR ELEMENTOS)
-   ========================================================================== */
-td a.addlink, td a.changelink, td a.viewlink,
-a.add-related, a.change-related, a.view-related, a.delete-related,
-.datetimeshortcuts,
-.actions label, .actions button.button {
-    display: none !important;
-}
-
-.btn-eliminar-custom {
-    background-color: #10b981;
-    color: #ffffff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    display: inline-flex;
-    transition: background-color 0.3s ease;
-}
-.btn-eliminar-custom:hover { background-color: #b02a37; }
-
-/* Ocultar el selector de tema (icono de sol/luna) */
-.theme-toggle {
-    display: none !important;
-}
-
-/* Opcional: Si el botón está dentro de un contenedor específico,
-   a veces es mejor ocultar el contenedor padre si existe */
-#header .theme-toggle {
-    display: none !important;
-}
-
-/* Ocultar el saludo, los enlaces de texto actuales y el botón de Dashboard */
-#header .user-tools-container,
-#header .welcome,
-#header .dashboard-link {
-    display: none !important;
-}
-
-/* Botón Dashboard */
-.btn-dashboard {
-    background-color: #10b981 !important;
-    color: white !important;
-    padding: 6px 12px;
-    border-radius: 5px;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-/* Contenedor del menú */
-.user-menu-container {
-    position: relative;
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 10px;
-}
-
-.user-icon-btn {
-    background: transparent !important;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-}
-
-/* Barra vertical desplegable */
-.user-dropdown-content {
-    display: none; /* Se activa con js */
-    flex-direction: column;
-    position: absolute;
-    right: 0;
-    top: 35px;
-    background: white;
-    border: 2px solid #10b981;
-    border-radius: 8px;
-    padding: 10px;
-    min-width: 160px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    z-index: 1000;
-}
-
-.user-dropdown-content a {
-    color: #065f46 !important;
-    padding: 8px 10px;
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.user-dropdown-content a:hover {
-    background: #f0fdf4;
-}
-
-.logout-btn {
-    background: none !important;
-    border: none !important;
-    color: #065f46 !important;
-    font-weight: 500 !important;
     padding: 8px 10px !important;
-    text-align: left !important;
-    width: 100% !important;
-    cursor: pointer !important;
-    font-family: inherit !important;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.logout-btn:hover {
-    background: #f0fdf4 !important;
+#login input[type="text"]:focus,
+#login input[type="password"]:focus {
+    border-color: #10b981 !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
 }
 
-/* Ocultar el menú de usuario si el contenedor está vacío */
-.user-menu-container:empty {
-    display: none !important;
+/* Labels del login */
+#login label {
+    color: #1e293b !important;
+    font-weight: 600;
+    font-size: 0.87rem;
 }
 
-/* ==========================================================================
-   MOVIMIENTO INDEPENDIENTE DE BOTONES (DRY)
-   ========================================================================== */
-
-/* Estilo base para el botón (usa tus colores verdes) */
-.btn-eliminar-custom {
-    background-color: var(--verde-claro) !important;
-    color: white !important;
-    border: none;
-    padding: 8px 15px;
+/* Botón de login */
+#login .submit-row input,
+#login input[type="submit"] {
+    background: #10b981 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 10px 20px !important;
+    font-weight: 700 !important;
+    width: 100%;
     cursor: pointer;
-    font-weight: bold;
-    display: inline-block;
+    transition: background 0.2s;
 }
 
-/* --- TABLA EVENTOS: Botón a la DERECHA --- */
-body.model-evento .actions {
-    display: flex;
-    justify-content: flex-end; /* Lo mueve al final de la barra */
+#login .submit-row input:hover,
+#login input[type="submit"]:hover {
+    background: #059669 !important;
 }
 
-/* --- TABLA SEDES: Botón con MARGEN extra --- */
-body.model-sede .btn-eliminar-custom {
-    margin-left: 50px !important;
-    background-color: #1e293b !important; /* Aquí podrías cambiar el color solo para esta tabla si quisieras */
+/* Header en el login */
+#header {
+    background: linear-gradient(90deg, #e5e7eb 0%, #10b981 100%) !important;
+    padding: 15px 25px;
 }
 
-/* --- TABLA EMPRESA: Mover toda la barra de acciones arriba --- */
-body.model-empresa .actions {
-    position: relative;
-    top: -10px;
+#branding {
+    background-image: url('/static/images/GrupoCarval.png');
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: contain;
+    min-width: 220px;
+    height: 50px;
+    text-indent: -9999px;
+    display: block;
 }
+
+#branding h1 { display: none !important; }

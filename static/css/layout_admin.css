@@ -1,33 +1,60 @@
+/* ==========================================================================
+   LAYOUT_ADMIN.CSS — ESTRUCTURA Y CONTENEDORES
+   ========================================================================== */
+
 #container {
     min-height: 100vh;
 }
 
 /* HEADER */
 #header {
-    background: linear-gradient(90deg, #e5e7eb, #10b981);
+    background: var(--gradiente-header) !important;
     padding: 15px 25px;
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text) !important;
 }
 
-/* BARRA OSCURA */
+/* BARRA DE BREADCRUMBS */
 .breadcrumbs {
-    background: #2f5d6d;
-    color: white;
+    background: var(--color-accent) !important;
+    color: #ffffff !important;
+    padding: 8px 20px;
+    font-size: 0.85rem;
 }
 
-/* CONTENIDO */
+.breadcrumbs a {
+    color: #a7f3d0 !important;
+}
+
+/* CONTENIDO PRINCIPAL */
 #content {
-    background: rgba(255,255,255,0.85);
-    padding: 15px;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.88) !important;
+    padding: 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text) !important;
 }
 
-/* SIDEBAR */
+/* SIDEBAR IZQUIERDA */
 #nav-sidebar {
-    background: #f1f5f9;
+    background: var(--color-bg-sidebar) !important;
+    border-right: 2px solid var(--color-border);
+    color: var(--color-text) !important;
 }
 
-#changelist-filter {
-    display: block !important;
-    float: right;
-    width: 260px;
+#nav-sidebar caption {
+    background: #cbd5e1 !important;
+    color: #334155 !important;
+    font-weight: bold;
+    border-radius: var(--radius-sm);
+}
+
+#nav-sidebar a {
+    color: var(--color-text) !important;
+}
+
+#nav-sidebar .current-model,
+#nav-sidebar .current-app {
+    background: var(--color-primary-light) !important;
+    color: var(--color-primary-dark) !important;
 }

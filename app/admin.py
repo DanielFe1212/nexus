@@ -4,16 +4,14 @@ ARCHIVO: admin.py
 ==============================================================================
 Propósito:
     Configura y personaliza el panel de administración de Django.
-    Define qué campos se ven en las listas, los filtros laterales y conecta
-    scripts (JavaScript) y hojas de estilo (CSS) externos para mejorar la UI.
+    Define columnas visibles, filtros laterales, acciones y conecta
+    los scripts (JS/CSS) externos definidos en BaseNexusAdmin (DRY).
 ==============================================================================
 """
 
 from django.contrib import admin
 from django.shortcuts import redirect
-from rangefilter.filters import DateRangeFilter
-from django.urls import reverse
-
+from rangefilter.filters import DateRangeFilterBuilder
 
 from .models import (
     Empresa, Sede, Proveedor,
@@ -21,21 +19,21 @@ from .models import (
     EnlaceDashboard
 )
 
-# Branding global
+# --- Branding global ---
 admin.site.site_header = "Administración Grupo Carval"
-admin.site.site_title = "Admin Carval"
+admin.site.site_title  = "Admin Carval"
 admin.site.index_title = "Panel de Control - Eventos"
 
 
+# ==============================================================================
+# BASE DRY — Carga de CSS/JS compartido en todos los modelos
+# ==============================================================================
+
 class BaseNexusAdmin(admin.ModelAdmin):
     """
-    Base DRY para todos los modelos del admin:
-    - Carga CSS y JS global
-    - Permite extender sin romper layout
+    Clase base para todos los ModelAdmin del proyecto.
+    Centraliza la carga de CSS y JS para mantener DRY.
     """
-
-    def has_add_permission(self, request, obj=None):
-        return True  # Cambiar a False si quieres quitar el botón de añadir general
 
     class Media:
         css = {
@@ -50,8 +48,13 @@ class BaseNexusAdmin(admin.ModelAdmin):
         js = (
             'js/custom_admin.js',
             'js/modulos/boton_eliminar.js',
+            'js/modulos/filtros_toggle.js',
         )
 
+
+# ==============================================================================
+# ENLACE DASHBOARD — Redirección rápida desde el menú
+# ==============================================================================
 
 @admin.register(EnlaceDashboard)
 class EnlaceDashboardAdmin(BaseNexusAdmin):
@@ -59,10 +62,65 @@ class EnlaceDashboardAdmin(BaseNexusAdmin):
         return redirect('/admin/app/dashboard/')
 
 
-@admin.register(Empresa, Sede, Proveedor, TipoFalla, ConfiguracionGlobal)
-class GeneralAdmin(BaseNexusAdmin):
-    pass
+# ==============================================================================
+# EMPRESA
+# ==============================================================================
 
+@admin.register(Empresa)
+class EmpresaAdmin(BaseNexusAdmin):
+    list_display  = ('nombre',)
+    search_fields = ('nombre',)
+    list_filter   = ('nombre',)
+    ordering      = ('nombre',)
+
+
+# ==============================================================================
+# PROVEEDOR
+# ==============================================================================
+
+@admin.register(Proveedor)
+class ProveedorAdmin(BaseNexusAdmin):
+    list_display  = ('nombre',)
+    search_fields = ('nombre',)
+    list_filter   = ('nombre',)
+    ordering      = ('nombre',)
+
+
+# ==============================================================================
+# TIPO DE FALLA
+# ==============================================================================
+
+@admin.register(TipoFalla)
+class TipoFallaAdmin(BaseNexusAdmin):
+    list_display  = ('nombre',)
+    search_fields = ('nombre',)
+    ordering      = ('nombre',)
+
+
+# ==============================================================================
+# CONFIGURACIÓN GLOBAL
+# ==============================================================================
+
+@admin.register(ConfiguracionGlobal)
+class ConfiguracionGlobalAdmin(BaseNexusAdmin):
+    list_display = ('meta_disponibilidad', 'minutos_dia')
+
+
+# ==============================================================================
+# SEDE
+# ==============================================================================
+
+@admin.register(Sede)
+class SedeAdmin(BaseNexusAdmin):
+    list_display  = ('nombre', 'idempresa', 'pais', 'canal_primario', 'canal_secundario', 'canal_mpls')
+    search_fields = ('nombre', 'idempresa__nombre', 'pais')
+    list_filter   = ('idempresa', 'pais', 'canal_primario', 'canal_secundario', 'canal_mpls')
+    ordering      = ('idempresa', 'nombre')
+
+
+# ==============================================================================
+# EVENTO — Con filtro de rango de fechas (rangefilter)
+# ==============================================================================
 
 @admin.register(Evento)
 class EventoAdmin(BaseNexusAdmin):
@@ -76,15 +134,41 @@ class EventoAdmin(BaseNexusAdmin):
         'fecha_fin',
         'duracion_horas',
         'duracion_minutos',
-        'idtipo_falla'
+        'idtipo_falla',
     )
 
+    search_fields = ('idsede__nombre', 'idsede__idempresa__nombre', 'idproveedor__nombre')
+
+    list_filter = (
+        'idsede__idempresa',
+        'rol',
+        'idproveedor',
+        'idtipo_falla',
+        ('fecha_inicio', DateRangeFilterBuilder(title='Rango de Fecha Inicio')),
+        ('fecha_fin',    DateRangeFilterBuilder(title='Rango de Fecha Fin')),
+    )
+
+    ordering = ('-fecha_inicio',)
+
+    # Agrega JS del reloj/calendario ADEMÁS del de la clase base
     class Media:
+        css = {
+            'all': (
+                'css/base_admin.css',
+                'css/layout_admin.css',
+                'css/navigation_admin.css',
+                'css/components_admin.css',
+                'css/overrides_admin.css',
+            )
+        }
         js = (
-            'js/reloj.js',
+            'js/custom_admin.js',
+            'js/modulos/boton_eliminar.js',
+            'js/modulos/filtros_toggle.js',
+            'js/modulos/reloj.js',
         )
 
     def get_empresa(self, obj):
-        return obj.idsede.idempresa.nombre if obj.idsede and obj.idsede.idempresa else "-"
+        return obj.idsede.idempresa.nombre if obj.idsede and obj.idsede.idempresa else '-'
 
-    get_empresa.short_description = "Empresa"
+    get_empresa.short_description = 'Empresa'

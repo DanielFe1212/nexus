@@ -1,11 +1,11 @@
 {% extends "admin/change_list.html" %}
 {% load static %}
 
-{% block extrahead %}
-    {{ block.super }}
-{% endblock %}
-
 {% block extrastyle %}
     {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static 'css/diseno_admin.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base_admin.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/layout_admin.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/navigation_admin.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/components_admin.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/overrides_admin.css' %}">
 {% endblock %}
