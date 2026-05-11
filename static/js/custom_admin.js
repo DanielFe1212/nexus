@@ -1,18 +1,34 @@
-document.addEventListener("DOMContentLoaded", function () {
+/**
+ * custom_admin.js
+ * Controla el menú desplegable del usuario en el header del admin.
+ * Se ejecuta con DOMContentLoaded para garantizar que el DOM esté listo.
+ */
 
-    const btn = document.getElementById('user-menu-btn');
-    const menu = document.getElementById('user-dropdown');
+document.addEventListener('DOMContentLoaded', function () {
 
-    if (btn && menu) {
+    var btn  = document.getElementById('user-menu-btn');
+    var menu = document.getElementById('user-dropdown');
 
-        btn.addEventListener("click", function (e) {
-            e.stopPropagation();
-            menu.style.display =
-                menu.style.display === 'flex' ? 'none' : 'flex';
-        });
+    if (!btn || !menu) return;
 
-        document.addEventListener("click", function () {
+    // Abrir / cerrar al hacer clic en el botón
+    btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var abierto = menu.style.display === 'flex';
+        menu.style.display = abierto ? 'none' : 'flex';
+    });
+
+    // Cerrar al hacer clic fuera del menú
+    document.addEventListener('click', function (e) {
+        if (!btn.contains(e.target) && !menu.contains(e.target)) {
             menu.style.display = 'none';
-        });
-    }
+        }
+    });
+
+    // Cerrar con tecla Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            menu.style.display = 'none';
+        }
+    });
 });

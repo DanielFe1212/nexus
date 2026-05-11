@@ -3,12 +3,8 @@
 
 {% block extrastyle %}
 {{ block.super }}
-{# Meta color-scheme forzado en light antes de cargar cualquier CSS #}
 <meta name="color-scheme" content="light">
-<style>
-    /* Bloqueo inmediato del modo oscuro antes de cargar hojas externas */
-    html { color-scheme: light only !important; }
-</style>
+<style>html { color-scheme: light only !important; }</style>
 <link rel="stylesheet" href="{% static 'css/base_admin.css' %}">
 <link rel="stylesheet" href="{% static 'css/layout_admin.css' %}">
 <link rel="stylesheet" href="{% static 'css/navigation_admin.css' %}">
@@ -18,6 +14,9 @@
 
 {% block extrahead %}
 {{ block.super }}
+{# Favicon en todo momento #}
+<link rel="icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
+<link rel="shortcut icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
 <script src="{% static 'js/custom_admin.js' %}"></script>
 {% endblock %}
 
@@ -35,14 +34,11 @@
     <div class="user-menu-container">
         <button id="user-menu-btn" class="user-icon-btn" type="button">👤</button>
         <div id="user-dropdown" class="user-dropdown-content">
-
             <a href="/admin/password_change/">CAMBIAR CONTRASEÑA</a>
-
             <form action="/admin/logout/" method="post" style="margin:0;">
                 {% csrf_token %}
                 <button type="submit" class="logout-btn">Terminar sesión</button>
             </form>
-
         </div>
     </div>
 

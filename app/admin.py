@@ -53,13 +53,22 @@ class BaseNexusAdmin(admin.ModelAdmin):
 
 
 # ==============================================================================
-# ENLACE DASHBOARD — Redirección rápida desde el menú
+# ENLACE DASHBOARD
+# Redirige al dashboard pero NO aparece en el menú lateral (show_in_index=False)
 # ==============================================================================
 
 @admin.register(EnlaceDashboard)
 class EnlaceDashboardAdmin(BaseNexusAdmin):
+
     def changelist_view(self, request, extra_context=None):
         return redirect('/admin/app/dashboard/')
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_module_perms(self, request):
+        """Oculta este modelo del índice principal del admin."""
+        return False
 
 
 # ==============================================================================
@@ -150,7 +159,6 @@ class EventoAdmin(BaseNexusAdmin):
 
     ordering = ('-fecha_inicio',)
 
-    # Agrega JS del reloj/calendario ADEMÁS del de la clase base
     class Media:
         css = {
             'all': (

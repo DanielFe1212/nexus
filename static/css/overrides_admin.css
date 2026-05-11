@@ -138,3 +138,20 @@ input[name="duracion_minutos"] {
     background: var(--color-primary) !important;
     color: #ffffff !important;
 }
+
+/* ------------------------------------------------------------------
+   OCULTAR barra de búsqueda "Empiece a escribir para filtrar..."
+   del nav-sidebar izquierdo
+   ------------------------------------------------------------------ */
+#nav-filter,
+#nav-sidebar .sticky {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------------
+   OCULTAR entrada "Ver Dashboard Completo" del menú lateral
+   (EnlaceDashboard está oculto desde admin.py, pero por si acaso)
+   ------------------------------------------------------------------ */
+#nav-sidebar a[href*="enlacedashboard"] {
+    display: none !important;
+}
