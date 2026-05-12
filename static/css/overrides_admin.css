@@ -1,10 +1,9 @@
 /* ==========================================================================
    OVERRIDES_ADMIN.CSS — ANULACIONES ESPECÍFICAS DE DJANGO ADMIN
-   Elimina modo oscuro, oculta iconos, controla visibilidad de elementos.
    ========================================================================== */
 
 /* ------------------------------------------------------------------
-   FORZAR MODO CLARO ABSOLUTO — anula Django's dark mode hook
+   FORZAR MODO CLARO ABSOLUTO
    ------------------------------------------------------------------ */
 html[data-theme="dark"],
 html[data-theme="dark"] body,
@@ -28,7 +27,6 @@ html[data-theme="dark"] textarea {
 
 /* Ocultar botón de tema (sol/luna) */
 .theme-toggle,
-#header .theme-toggle,
 button.theme-toggle,
 [title="Toggle theme"],
 [aria-label="Toggle theme"] {
@@ -36,34 +34,24 @@ button.theme-toggle,
 }
 
 /* ------------------------------------------------------------------
-   OCULTAR ICONOS DE ACCIÓN (añadir, cambiar, ver, eliminar relación)
-   Punto 6 del requerimiento.
+   OCULTAR SOLO los iconos de relación (ojo, lápiz junto a FK)
+   PERO NO el botón "Añadir X" del índice (a.addlink en índice)
    ------------------------------------------------------------------ */
+/* Iconos inline en formularios (junto a select de FK) */
 a.add-related,
 a.change-related,
 a.view-related,
 a.delete-related,
-a.addlink,
-a.changelink,
-a.viewlink,
-td a.addlink,
+/* Iconos en columnas de tabla de lista */
 td a.changelink,
 td a.viewlink,
-th a.addlink,
-th a.changelink,
-.datetimeshortcuts,
-.datetimeshortcuts a,
-.date-icon,
-.time-icon {
+th a.changelink {
     display: none !important;
 }
 
-/* ------------------------------------------------------------------
-   OCULTAR ATAJOS DE FECHA/HORA NATIVOS DE DJANGO
-   (reemplazados por flatpickr + clockpicker)
-   ------------------------------------------------------------------ */
-.datetimeshortcuts { display: none !important; }
-p.datetime          { display: flex; flex-wrap: wrap; gap: 10px; }
+/* Atajos de fecha/hora nativos de Django (reemplazados por flatpickr) */
+.datetimeshortcuts        { display: none !important; }
+p.datetime                { display: flex; flex-wrap: wrap; gap: 10px; }
 p.datetime span.timezonewarning { display: none !important; }
 
 /* ------------------------------------------------------------------
@@ -84,18 +72,11 @@ p.datetime span.timezonewarning { display: none !important; }
 #branding h1 { display: none !important; }
 
 /* ------------------------------------------------------------------
-   BRANDING TEXTO (cuando no hay logo)
+   USER TOOLS - colores
    ------------------------------------------------------------------ */
 #user-tools { color: #000000 !important; }
 #user-tools a { color: #000000 !important; font-weight: bold; }
 #user-tools a:hover { color: var(--color-accent) !important; }
-
-/* ------------------------------------------------------------------
-   ACCIONES POR MODELO — posicionamiento del botón eliminar
-   ------------------------------------------------------------------ */
-body.model-evento .actions  { display: flex; justify-content: flex-end; }
-body.model-sede .actions    { display: flex; justify-content: flex-start; }
-body.model-empresa .actions { display: flex; justify-content: flex-start; }
 
 /* ------------------------------------------------------------------
    CAMPOS SOLO-LECTURA (duracion_horas, duracion_minutos)
@@ -118,7 +99,6 @@ input[name="duracion_minutos"] {
     margin-bottom: 6px;
     font-weight: 600;
 }
-
 .messagelist li.success { background: var(--color-primary-light) !important; color: var(--color-primary-dark) !important; border-left: 4px solid var(--color-primary); }
 .messagelist li.warning { background: #fef3c7 !important; color: #92400e !important; border-left: 4px solid #f59e0b; }
 .messagelist li.error   { background: #fee2e2 !important; color: #991b1b !important; border-left: 4px solid #ef4444; }
@@ -133,15 +113,13 @@ input[name="duracion_minutos"] {
     background: #ffffff !important;
     color: var(--color-text) !important;
 }
-
 #changelist-search input[type="submit"] {
     background: var(--color-primary) !important;
     color: #ffffff !important;
 }
 
 /* ------------------------------------------------------------------
-   OCULTAR barra de búsqueda "Empiece a escribir para filtrar..."
-   del nav-sidebar izquierdo
+   OCULTAR barra "Empiece a escribir para filtrar..." del nav-sidebar
    ------------------------------------------------------------------ */
 #nav-filter,
 #nav-sidebar .sticky {
@@ -149,9 +127,9 @@ input[name="duracion_minutos"] {
 }
 
 /* ------------------------------------------------------------------
-   OCULTAR entrada "Ver Dashboard Completo" del menú lateral
-   (EnlaceDashboard está oculto desde admin.py, pero por si acaso)
+   OCULTAR EnlaceDashboard del menú lateral
    ------------------------------------------------------------------ */
-#nav-sidebar a[href*="enlacedashboard"] {
+#nav-sidebar a[href*="enlacedashboard"],
+th.column-nombre a[href*="enlacedashboard"] {
     display: none !important;
 }

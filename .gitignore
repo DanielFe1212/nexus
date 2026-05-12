@@ -1,44 +1,36 @@
-# PyCharm / JetBrains
-.python-version
-.idea/
-*.iml
-cmake-build-*/
-out/
-parts/
-
-# Entornos Virtuales (Local)
-.venv/
-venv/
-ENV/
-env/
-bin/
-lib/
-include/
-share/
-pyvenv.cfg
-
-# Python (Archivos temporales y caché)
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib64/
-sdist/
-var/
-wheels/
-share/python-wheels/
+*.pyo
+*.pyd
 *.egg-info/
-.installed.cfg
-*.egg
+dist/
+build/
 
-# Variables de entorno (Seguridad)
+# ── Django ────────────────────────────────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+
+# ── Entorno virtual ───────────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Variables de entorno — NUNCA subir ───────────────────────────────────────
 .env
-.venv
-*.env
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

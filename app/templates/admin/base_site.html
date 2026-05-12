@@ -14,10 +14,8 @@
 
 {% block extrahead %}
 {{ block.super }}
-{# Favicon en todo momento #}
 <link rel="icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
 <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
-<script src="{% static 'js/custom_admin.js' %}"></script>
 {% endblock %}
 
 {% block userlinks %}
@@ -32,8 +30,12 @@
     </a>
 
     <div class="user-menu-container">
-        <button id="user-menu-btn" class="user-icon-btn" type="button">👤</button>
-        <div id="user-dropdown" class="user-dropdown-content">
+        <button id="user-menu-btn" class="user-icon-btn" type="button">
+            <img src="{% static 'images/logo_user.png' %}"
+                 alt="Usuario"
+                 style="height:32px; width:32px; object-fit:contain; display:block;">
+        </button>
+        <div id="user-dropdown" class="user-dropdown-content" style="display:none; flex-direction:column;">
             <a href="/admin/password_change/">CAMBIAR CONTRASEÑA</a>
             <form action="/admin/logout/" method="post" style="margin:0;">
                 {% csrf_token %}
@@ -43,4 +45,35 @@
     </div>
 
 </div>
+
+<script>
+(function() {
+    function initMenu() {
+        var btn  = document.getElementById('user-menu-btn');
+        var menu = document.getElementById('user-dropdown');
+        if (!btn || !menu) return;
+
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') menu.style.display = 'none';
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMenu);
+    } else {
+        initMenu();
+    }
+})();
+</script>
 {% endblock %}

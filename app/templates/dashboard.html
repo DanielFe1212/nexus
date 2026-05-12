@@ -4,85 +4,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>Dashboard de Disponibilidad — Grupo Carval</title>
 
     <link rel="icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <title>Dashboard de Disponibilidad</title>
 
     <style>
-        .table-excel { font-size: 0.85rem; border: 1px solid #dee2e6; }
-        .table-excel th { background-color: #f8f9fa; text-align: center; vertical-align: middle; border: 1px solid #dee2e6; }
-        .nav-pills .nav-link { color: #555; font-weight: 500; border: 1px solid transparent; }
-        .nav-pills .nav-link.active { background-color: #0d6efd; color: white; }
-        .header-p { background-color: #e3f2fd !important; }
-        .header-s { background-color: #f1f8e9 !important; }
-        .header-m { background-color: #f3e5f5 !important; }
-        .header-total { background-color: #fff3e0 !important; }
-        .table-responsive { max-height: 80vh; overflow-y: auto; }
+        /* ── Paleta ─────────────────────────────────────────────── */
+        :root {
+            --color-primary:      #10b981;
+            --color-primary-dark: #065f46;
+            --color-accent:       #2f5d6d;
+            --color-bg:           #f0f7f4;
+        }
 
-        /* Estilos del Acordeón */
-        .accordion-button:not(.collapsed) { background-color: #e3f2fd; color: #0d6efd; font-weight: bold; }
-        .list-group-item.active { background-color: #0d6efd; border-color: #0d6efd; }
+        html, body {
+            background: linear-gradient(160deg, #c7e3d3 0%, #f0f7f4 100%) !important;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        /* ── Header ─────────────────────────────────────────────── */
+        .dash-header {
+            background: linear-gradient(90deg, #e5e7eb 0%, #10b981 100%);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .dash-header .logo-area img { height: 44px; }
+
+        .btn-volver {
+            background: var(--color-accent);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-volver:hover { background: var(--color-primary-dark); color: #fff; }
+
+        .btn-graficas {
+            background: var(--color-primary);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .btn-graficas:hover { background: var(--color-primary-dark); color: #fff; }
+
+        /* ── Tabs ────────────────────────────────────────────────── */
+        .nav-pills .nav-link { color: #334155; font-weight: 500; font-size: 0.85rem; }
+        .nav-pills .nav-link.active {
+            background: var(--color-accent);
+            color: #fff;
+        }
+
+        /* ── Tablas ──────────────────────────────────────────────── */
+        .table-excel { font-size: 0.83rem; border: 1px solid #dee2e6; background: #fff; }
+        .table-excel th { text-align: center; vertical-align: middle; border: 1px solid #dee2e6; }
+        .table-responsive { max-height: 75vh; overflow-y: auto; }
+
+        .header-p     { background-color: #e3f2fd !important; }
+        .header-s     { background-color: #f1f8e9 !important; }
+        .header-m     { background-color: #f3e5f5 !important; }
+        .header-total { background-color: #fff3e0 !important; }
+
+        /* ── Filtro bar ──────────────────────────────────────────── */
+        .filtro-bar {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filtro-bar label { font-weight: 600; font-size: 0.84rem; color: var(--color-accent); margin: 0; }
+
+        /* ── Botón exportar ──────────────────────────────────────── */
+        .btn-exportar {
+            background: #1d6f42;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-exportar:hover { background: #155232; }
+
+        /* ── Acordeón lateral ────────────────────────────────────── */
+        .accordion-button:not(.collapsed) {
+            background-color: #d1fae5;
+            color: var(--color-primary-dark);
+            font-weight: bold;
+        }
+        .list-group-item.active {
+            background-color: var(--color-accent);
+            border-color: var(--color-accent);
+        }
+
+        /* ── Graficas modal ──────────────────────────────────────── */
+        .chart-container { position: relative; height: 320px; }
     </style>
 </head>
-<body class="p-4 bg-light">
-    <div class="container-fluid">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div class="d-flex align-items-center gap-3">
-                <a href="/admin/" class="btn btn-outline-secondary fw-bold shadow-sm">
-                    &larr; Volver al Admin
-                </a>
-                <div>
-                    <h2 class="mb-0">Dashboard de Disponibilidad</h2>
-                    <p class="text-muted mb-0">{{ mes_nombre }} {{ anio_gen }}</p>
-                </div>
-            </div>
-            <div class="d-flex gap-2">
-                <span class="badge bg-dark p-2">SLA Meta: {{ meta_global }}%</span>
-                <span class="badge bg-secondary p-2">Minutos Mes: {{ minutos_mes }}</span>
-            </div>
-        </div>
+<body>
 
-        <ul class="nav nav-pills mb-4 shadow-sm bg-white p-2 rounded" id="pills-tab" role="tablist">
-            <li class="nav-item" role="presentation"><button class="nav-link active" id="pills-sedes-tab" data-bs-toggle="pill" data-bs-target="#pills-sedes" type="button" role="tab">Disponibilidad Sedes</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" id="pills-canales-tab" data-bs-toggle="pill" data-bs-target="#pills-canales" type="button" role="tab">Global Proveedores</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" id="pills-matriz-tab" data-bs-toggle="pill" data-bs-target="#pills-matriz" type="button" role="tab">Matriz Histórica</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" id="pills-mpls-tab" data-bs-toggle="pill" data-bs-target="#pills-mpls" type="button" role="tab">Rendimiento MPLS</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" id="pills-global-mpls-tab" data-bs-toggle="pill" data-bs-target="#pills-global-mpls" type="button" role="tab">Global Prov. MPLS</button></li>
-            <li class="nav-item" role="presentation"><button class="nav-link" id="pills-individual-tab" data-bs-toggle="pill" data-bs-target="#pills-individual" type="button" role="tab">Historial por Sede</button></li>
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HEADER                                                      -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="dash-header">
+        <div class="logo-area">
+            <img src="{% static 'images/GrupoCarval.png' %}" alt="Grupo Carval">
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <h6 class="mb-0 fw-bold" style="font-size:0.88rem;">
+                Dashboard de Disponibilidad — {{ mes_nombre }} {{ anio_gen }}
+            </h6>
+            <span class="badge" style="background:var(--color-accent);">SLA Meta: {{ meta_global }}%</span>
+            <span class="badge bg-secondary">Min. Mes: {{ minutos_mes }}</span>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn-graficas" data-bs-toggle="modal" data-bs-target="#modalGraficas">
+                📊 Ver Gráficas
+            </button>
+            <a href="/admin/" class="btn-volver">← Volver al Admin</a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- CONTENIDO PRINCIPAL                                         -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="container-fluid px-4">
+
+        <!-- TABS -->
+        <ul class="nav nav-pills mb-3 bg-white p-2 rounded shadow-sm" id="pills-tab" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-sedes"      type="button">Disponibilidad Sedes</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="pill" data-bs-target="#tab-canales"    type="button">Global Proveedores</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="pill" data-bs-target="#tab-matriz"     type="button">Matriz Histórica</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="pill" data-bs-target="#tab-mpls"       type="button">Rendimiento MPLS</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="pill" data-bs-target="#tab-gmpls"      type="button">Global Prov. MPLS</button></li>
+            <li class="nav-item"><button class="nav-link"        data-bs-toggle="pill" data-bs-target="#tab-historial"  type="button">Historial por Sede</button></li>
         </ul>
 
         <div class="tab-content" id="pills-tabContent">
 
-            <div class="tab-pane fade show active" id="pills-sedes" role="tabpanel">
-                <div class="mb-3 p-2 bg-white shadow-sm border rounded">
-                    <form method="GET" class="d-flex align-items-center gap-2 m-0">
-                        <label class="fw-bold text-primary mb-0">Mes:</label>
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- TAB 1: DISPONIBILIDAD SEDES                        -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <div class="tab-pane fade show active" id="tab-sedes" role="tabpanel">
+                <div class="filtro-bar">
+                    <label>Mes:</label>
+                    <form method="GET" class="d-flex gap-2 align-items-center m-0">
                         <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                            <option value="1" {% if mes_gen == 1 %}selected{% endif %}>Enero</option>
-                            <option value="2" {% if mes_gen == 2 %}selected{% endif %}>Febrero</option>
-                            <option value="3" {% if mes_gen == 3 %}selected{% endif %}>Marzo</option>
-                            <option value="4" {% if mes_gen == 4 %}selected{% endif %}>Abril</option>
-                            <option value="5" {% if mes_gen == 5 %}selected{% endif %}>Mayo</option>
-                            <option value="6" {% if mes_gen == 6 %}selected{% endif %}>Junio</option>
-                            <option value="7" {% if mes_gen == 7 %}selected{% endif %}>Julio</option>
-                            <option value="8" {% if mes_gen == 8 %}selected{% endif %}>Agosto</option>
-                            <option value="9" {% if mes_gen == 9 %}selected{% endif %}>Septiembre</option>
+                            <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
+                            <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
+                            <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
+                            <option value="4"  {% if mes_gen == 4  %}selected{% endif %}>Abril</option>
+                            <option value="5"  {% if mes_gen == 5  %}selected{% endif %}>Mayo</option>
+                            <option value="6"  {% if mes_gen == 6  %}selected{% endif %}>Junio</option>
+                            <option value="7"  {% if mes_gen == 7  %}selected{% endif %}>Julio</option>
+                            <option value="8"  {% if mes_gen == 8  %}selected{% endif %}>Agosto</option>
+                            <option value="9"  {% if mes_gen == 9  %}selected{% endif %}>Septiembre</option>
                             <option value="10" {% if mes_gen == 10 %}selected{% endif %}>Octubre</option>
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label class="fw-bold text-primary mb-0 ms-3">Año:</label>
+                        <label>Año:</label>
                         <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
                         </select>
                     </form>
+                    <button class="btn-exportar ms-auto" onclick="exportarTabla('tabla-sedes', 'Disponibilidad_Sedes')">⬇ Exportar Excel</button>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
+                    <table class="table table-bordered table-sm table-excel" id="tabla-sedes">
                         <thead>
                             <tr>
                                 <th rowspan="2">Sede</th>
@@ -105,80 +218,94 @@
                                     <td>{{ f.canal_s }}</td><td class="text-end">{{ f.min_s }}</td><td class="text-end">{{ f.disp_s }}%</td><td class="text-end text-muted">{{ f.indisp_s_pct }}%</td>
                                     <td class="text-end fw-bold {% if f.cumple %}text-success{% else %}text-danger{% endif %}">{{ f.disp_total }}%</td>
                                     <td class="text-center">{{ f.meta }}%</td>
-                                    <td class="text-center">{% if f.cumple %} ✔ {% else %} ✘ {% endif %}</td>
+                                    <td class="text-center">{% if f.cumple %}✔{% else %}✘{% endif %}</td>
                                 </tr>
                                 {% endfor %}
                             {% else %}
-                                <tr><td colspan="11" class="text-center text-muted fst-italic p-3">No hay datos.</td></tr>
+                                <tr><td colspan="11" class="text-center text-muted fst-italic p-3">No hay datos para este período.</td></tr>
                             {% endif %}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="pills-canales" role="tabpanel">
-                <div class="mb-3 p-2 bg-white shadow-sm border rounded">
-                    <form method="GET" class="d-flex align-items-center gap-2 m-0">
-                        <label class="fw-bold text-primary mb-0">Mes:</label>
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- TAB 2: GLOBAL PROVEEDORES                          -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <div class="tab-pane fade" id="tab-canales" role="tabpanel">
+                <div class="filtro-bar">
+                    <form method="GET" class="d-flex gap-2 align-items-center m-0">
+                        <label>Mes:</label>
                         <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                            <option value="1" {% if mes_gen == 1 %}selected{% endif %}>Enero</option>
-                            <option value="2" {% if mes_gen == 2 %}selected{% endif %}>Febrero</option>
-                            <option value="3" {% if mes_gen == 3 %}selected{% endif %}>Marzo</option>
-                            <option value="4" {% if mes_gen == 4 %}selected{% endif %}>Abril</option>
-                            <option value="5" {% if mes_gen == 5 %}selected{% endif %}>Mayo</option>
-                            <option value="6" {% if mes_gen == 6 %}selected{% endif %}>Junio</option>
-                            <option value="7" {% if mes_gen == 7 %}selected{% endif %}>Julio</option>
-                            <option value="8" {% if mes_gen == 8 %}selected{% endif %}>Agosto</option>
-                            <option value="9" {% if mes_gen == 9 %}selected{% endif %}>Septiembre</option>
+                            <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
+                            <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
+                            <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
+                            <option value="4"  {% if mes_gen == 4  %}selected{% endif %}>Abril</option>
+                            <option value="5"  {% if mes_gen == 5  %}selected{% endif %}>Mayo</option>
+                            <option value="6"  {% if mes_gen == 6  %}selected{% endif %}>Junio</option>
+                            <option value="7"  {% if mes_gen == 7  %}selected{% endif %}>Julio</option>
+                            <option value="8"  {% if mes_gen == 8  %}selected{% endif %}>Agosto</option>
+                            <option value="9"  {% if mes_gen == 9  %}selected{% endif %}>Septiembre</option>
                             <option value="10" {% if mes_gen == 10 %}selected{% endif %}>Octubre</option>
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label class="fw-bold text-primary mb-0 ms-3">Año:</label>
+                        <label>Año:</label>
                         <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
                         </select>
                     </form>
+                    <button class="btn-exportar ms-auto" onclick="exportarTabla('tabla-canales', 'Global_Proveedores')">⬇ Exportar Excel</button>
                 </div>
-                <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
-                    <thead class="table-secondary text-center">
-                        <tr><th>Proveedor</th><th>Sedes en Uso</th><th>Min. Caída Total</th><th>Min. Posibles</th><th>Disponibilidad Canal</th><th>Estado</th></tr>
-                    </thead>
-                    <tbody>
-                        {% if canales %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm table-excel" id="tabla-canales">
+                        <thead class="table-secondary text-center">
+                            <tr><th>Proveedor</th><th>Sedes en Uso</th><th>Min. Caída Total</th><th>Min. Posibles</th><th>Disponibilidad</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody>
                             {% for c in canales %}
                             <tr>
-                                <td class="fw-bold text-center">{{ c.nombre }}</td><td class="text-center">{{ c.sedes_uso }}</td><td class="text-end">{{ c.min_caida }}</td>
-                                <td class="text-end">{{ c.min_posibles }}</td><td class="text-end fw-bold">{{ c.disp }}%</td>
+                                <td class="fw-bold text-center">{{ c.nombre }}</td>
+                                <td class="text-center">{{ c.sedes_uso }}</td>
+                                <td class="text-end">{{ c.min_caida }}</td>
+                                <td class="text-end">{{ c.min_posibles }}</td>
+                                <td class="text-end fw-bold">{{ c.disp }}%</td>
                                 <td class="text-center">{% if c.cumple %}<span class="text-success fw-bold">CUMPLE ✔</span>{% else %}<span class="text-danger fw-bold">FALLA ✘</span>{% endif %}</td>
                             </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted fst-italic p-3">No hay datos de proveedores globales.</td></tr>
                             {% endfor %}
-                        {% else %}
-                            <tr><td colspan="6" class="text-center text-muted fst-italic p-3">No hay datos de proveedores globales disponibles.</td></tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="tab-pane fade" id="pills-matriz" role="tabpanel">
-                <div class="mb-3 p-2 bg-white shadow-sm border rounded">
-                    <form method="GET" class="d-flex align-items-center gap-2 m-0">
-                        <label class="fw-bold text-primary mb-0">Seleccionar Año a Evaluar:</label>
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- TAB 3: MATRIZ HISTÓRICA                            -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <div class="tab-pane fade" id="tab-matriz" role="tabpanel">
+                <div class="filtro-bar">
+                    <form method="GET" class="d-flex gap-2 align-items-center m-0">
+                        <label>Año a evaluar:</label>
                         <select name="anio_matriz" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_matriz == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_matriz == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_matriz == 2026 %}selected{% endif %}>2026</option>
                         </select>
                     </form>
+                    <button class="btn-exportar ms-auto" onclick="exportarTabla('tabla-matriz', 'Matriz_Historica')">⬇ Exportar Excel</button>
                 </div>
-                <table class="table table-bordered table-sm table-excel shadow-sm bg-white text-center">
-                    <thead class="table-light">
-                        <tr><th>MES / HISTÓRICO</th>{% for p in lista_proveedores %}<th>{{ p.nombre|upper }}</th>{% endfor %}</tr>
-                    </thead>
-                    <tbody>
-                        {% if resumen_historico %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm table-excel text-center" id="tabla-matriz">
+                        <thead class="table-light">
+                            <tr>
+                                <th>MES / HISTÓRICO</th>
+                                {% for p in lista_proveedores %}<th>{{ p.nombre|upper }}</th>{% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
                             {% for fila in resumen_historico %}
                             <tr>
                                 <td class="fw-bold bg-light">{{ fila.nombre }}</td>
@@ -186,141 +313,161 @@
                                 <td class="{% if valor < meta_global %}text-danger fw-bold{% else %}text-success{% endif %}">{{ valor }}%</td>
                                 {% endfor %}
                             </tr>
+                            {% empty %}
+                            <tr><td colspan="10" class="text-muted fst-italic p-3">No hay datos históricos para este año.</td></tr>
                             {% endfor %}
-                        {% else %}
-                            <tr><td colspan="10" class="text-muted fst-italic p-3">No hay datos históricos disponibles para este año.</td></tr>
-                        {% endif %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="tab-pane fade" id="pills-mpls" role="tabpanel">
-                <div class="mb-3 p-2 bg-white shadow-sm border rounded">
-                    <form method="GET" class="d-flex align-items-center gap-2 m-0">
-                        <label class="fw-bold text-primary mb-0">Mes:</label>
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- TAB 4: RENDIMIENTO MPLS                            -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <div class="tab-pane fade" id="tab-mpls" role="tabpanel">
+                <div class="filtro-bar">
+                    <form method="GET" class="d-flex gap-2 align-items-center m-0">
+                        <label>Mes:</label>
                         <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                            <option value="1" {% if mes_gen == 1 %}selected{% endif %}>Enero</option>
-                            <option value="2" {% if mes_gen == 2 %}selected{% endif %}>Febrero</option>
-                            <option value="3" {% if mes_gen == 3 %}selected{% endif %}>Marzo</option>
-                            <option value="4" {% if mes_gen == 4 %}selected{% endif %}>Abril</option>
-                            <option value="5" {% if mes_gen == 5 %}selected{% endif %}>Mayo</option>
-                            <option value="6" {% if mes_gen == 6 %}selected{% endif %}>Junio</option>
-                            <option value="7" {% if mes_gen == 7 %}selected{% endif %}>Julio</option>
-                            <option value="8" {% if mes_gen == 8 %}selected{% endif %}>Agosto</option>
-                            <option value="9" {% if mes_gen == 9 %}selected{% endif %}>Septiembre</option>
+                            <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
+                            <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
+                            <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
+                            <option value="4"  {% if mes_gen == 4  %}selected{% endif %}>Abril</option>
+                            <option value="5"  {% if mes_gen == 5  %}selected{% endif %}>Mayo</option>
+                            <option value="6"  {% if mes_gen == 6  %}selected{% endif %}>Junio</option>
+                            <option value="7"  {% if mes_gen == 7  %}selected{% endif %}>Julio</option>
+                            <option value="8"  {% if mes_gen == 8  %}selected{% endif %}>Agosto</option>
+                            <option value="9"  {% if mes_gen == 9  %}selected{% endif %}>Septiembre</option>
                             <option value="10" {% if mes_gen == 10 %}selected{% endif %}>Octubre</option>
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label class="fw-bold text-primary mb-0 ms-3">Año:</label>
+                        <label>Año:</label>
                         <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
                         </select>
                     </form>
+                    <button class="btn-exportar ms-auto" onclick="exportarTabla('tabla-mpls', 'Rendimiento_MPLS')">⬇ Exportar Excel</button>
                 </div>
-                <table class="table table-bordered table-sm table-excel shadow-sm bg-white text-center">
-                    <thead class="header-m">
-                        <tr><th>Sede</th><th>Proveedor MPLS Asignado</th><th>Minutos de Caída</th><th>Disponibilidad %</th><th>Indisponibilidad %</th><th>SLA</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for m in reporte_mpls %}
-                        <tr>
-                            <td class="fw-bold text-start">{{ m.sede }}</td><td>{{ m.proveedor }}</td><td class="text-end">{{ m.min_caida }}</td>
-                            <td class="text-end fw-bold {% if m.cumple %}text-success{% else %}text-danger{% endif %}">{{ m.disp }}%</td>
-                            <td class="text-end text-muted">{{ m.indisp }}%</td><td class="text-center">{% if m.cumple %} ✔ {% else %} ✘ {% endif %}</td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="6" class="text-center text-muted fst-italic p-3">Ninguna sede tiene asignado un enlace MPLS actualmente.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm table-excel text-center" id="tabla-mpls">
+                        <thead class="header-m">
+                            <tr><th>Sede</th><th>Proveedor MPLS</th><th>Min. Caída</th><th>Disponibilidad %</th><th>Indisponibilidad %</th><th>SLA</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for m in reporte_mpls %}
+                            <tr>
+                                <td class="fw-bold text-start">{{ m.sede }}</td>
+                                <td>{{ m.proveedor }}</td>
+                                <td class="text-end">{{ m.min_caida }}</td>
+                                <td class="text-end fw-bold {% if m.cumple %}text-success{% else %}text-danger{% endif %}">{{ m.disp }}%</td>
+                                <td class="text-end text-muted">{{ m.indisp }}%</td>
+                                <td>{% if m.cumple %}✔{% else %}✘{% endif %}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted fst-italic p-3">Ninguna sede tiene enlace MPLS asignado.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="tab-pane fade" id="pills-global-mpls" role="tabpanel">
-                <div class="mb-3 p-2 bg-white shadow-sm border rounded">
-                    <form method="GET" class="d-flex align-items-center gap-2 m-0">
-                        <label class="fw-bold text-primary mb-0">Mes:</label>
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- TAB 5: GLOBAL PROVEEDORES MPLS                     -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <div class="tab-pane fade" id="tab-gmpls" role="tabpanel">
+                <div class="filtro-bar">
+                    <form method="GET" class="d-flex gap-2 align-items-center m-0">
+                        <label>Mes:</label>
                         <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
-                            <option value="1" {% if mes_gen == 1 %}selected{% endif %}>Enero</option>
-                            <option value="2" {% if mes_gen == 2 %}selected{% endif %}>Febrero</option>
-                            <option value="3" {% if mes_gen == 3 %}selected{% endif %}>Marzo</option>
-                            <option value="4" {% if mes_gen == 4 %}selected{% endif %}>Abril</option>
-                            <option value="5" {% if mes_gen == 5 %}selected{% endif %}>Mayo</option>
-                            <option value="6" {% if mes_gen == 6 %}selected{% endif %}>Junio</option>
-                            <option value="7" {% if mes_gen == 7 %}selected{% endif %}>Julio</option>
-                            <option value="8" {% if mes_gen == 8 %}selected{% endif %}>Agosto</option>
-                            <option value="9" {% if mes_gen == 9 %}selected{% endif %}>Septiembre</option>
+                            <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
+                            <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
+                            <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
+                            <option value="4"  {% if mes_gen == 4  %}selected{% endif %}>Abril</option>
+                            <option value="5"  {% if mes_gen == 5  %}selected{% endif %}>Mayo</option>
+                            <option value="6"  {% if mes_gen == 6  %}selected{% endif %}>Junio</option>
+                            <option value="7"  {% if mes_gen == 7  %}selected{% endif %}>Julio</option>
+                            <option value="8"  {% if mes_gen == 8  %}selected{% endif %}>Agosto</option>
+                            <option value="9"  {% if mes_gen == 9  %}selected{% endif %}>Septiembre</option>
                             <option value="10" {% if mes_gen == 10 %}selected{% endif %}>Octubre</option>
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label class="fw-bold text-primary mb-0 ms-3">Año:</label>
+                        <label>Año:</label>
                         <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
                         </select>
                     </form>
+                    <button class="btn-exportar ms-auto" onclick="exportarTabla('tabla-gmpls', 'Global_MPLS')">⬇ Exportar Excel</button>
                 </div>
-                <table class="table table-bordered table-sm table-excel shadow-sm bg-white">
-                    <thead class="header-m text-center">
-                        <tr><th>Proveedor</th><th>Sedes con MPLS</th><th>Min. Caída Total (Rol MPLS)</th><th>Min. Posibles</th><th>Disponibilidad</th><th>Estado</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for c in canales_mpls %}
-                        <tr>
-                            <td class="fw-bold text-center">{{ c.nombre }}</td>
-                            <td class="text-center">{{ c.sedes_uso }}</td><td class="text-end">{{ c.min_caida }}</td><td class="text-end">{{ c.min_posibles }}</td>
-                            <td class="text-end fw-bold">{{ c.disp }}%</td>
-                            <td class="text-center">{% if c.cumple %}<span class="text-success fw-bold">CUMPLE ✔</span>{% else %}<span class="text-danger fw-bold">FALLA ✘</span>{% endif %}</td>
-                        </tr>
-                        {% empty %}
-                        <tr><td colspan="6" class="text-center text-muted fst-italic p-3">No hay proveedores asignados como MPLS actualmente.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm table-excel" id="tabla-gmpls">
+                        <thead class="header-m text-center">
+                            <tr><th>Proveedor</th><th>Sedes con MPLS</th><th>Min. Caída Total</th><th>Min. Posibles</th><th>Disponibilidad</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for c in canales_mpls %}
+                            <tr>
+                                <td class="fw-bold text-center">{{ c.nombre }}</td>
+                                <td class="text-center">{{ c.sedes_uso }}</td>
+                                <td class="text-end">{{ c.min_caida }}</td>
+                                <td class="text-end">{{ c.min_posibles }}</td>
+                                <td class="text-end fw-bold">{{ c.disp }}%</td>
+                                <td class="text-center">{% if c.cumple %}<span class="text-success fw-bold">CUMPLE ✔</span>{% else %}<span class="text-danger fw-bold">FALLA ✘</span>{% endif %}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted fst-italic p-3">No hay proveedores MPLS configurados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="tab-pane fade" id="pills-individual" role="tabpanel">
-                <button id="btnToggleFiltro" class="btn btn-sm btn-outline-primary mb-3 shadow-sm fw-bold">
-                    <span id="iconoFiltro">◀</span> Ocultar Filtros
-                </button>
+            <!-- ══════════════════════════════════════════════════ -->
+            <!-- TAB 6: HISTORIAL POR SEDE                          -->
+            <!-- ══════════════════════════════════════════════════ -->
+            <div class="tab-pane fade" id="tab-historial" role="tabpanel">
+                <div class="d-flex gap-2 mb-3">
+                    <button id="btnToggleFiltro" class="btn btn-sm fw-bold" style="background:var(--color-accent);color:#fff;">
+                        ◀ Ocultar Filtros
+                    </button>
+                    <button class="btn-exportar" onclick="exportarTabla('tabla-historial', 'Historial_Sede')">⬇ Exportar Excel</button>
+                </div>
 
                 <div class="row">
-                    <div class="col-md-3 transition-width" id="panelFiltros">
+                    <div class="col-md-3" id="panelFiltros">
                         <div class="card shadow-sm border-0 mb-3">
-                            <div class="card-header bg-primary text-white fw-bold">
-                                Filtros de Búsqueda
-                            </div>
+                            <div class="card-header fw-bold text-white" style="background:var(--color-accent);">Filtros de Búsqueda</div>
                             <div class="card-body p-3">
                                 <form method="GET" id="form-filtro-sede">
-                                    <label class="fw-bold text-secondary mb-1 small">Seleccionar Año:</label>
+                                    <label class="fw-bold small text-secondary mb-1">Seleccionar Año:</label>
                                     <select name="anio_hist" class="form-select form-select-sm mb-3" onchange="this.form.submit()">
                                         <option value="2024" {% if anio_hist == 2024 %}selected{% endif %}>2024</option>
                                         <option value="2025" {% if anio_hist == 2025 %}selected{% endif %}>2025</option>
                                         <option value="2026" {% if anio_hist == 2026 %}selected{% endif %}>2026</option>
                                     </select>
-
-                                    <label class="fw-bold text-secondary mb-2 small">Seleccionar Sede:</label>
+                                    <label class="fw-bold small text-secondary mb-2">Seleccionar Sede:</label>
                                     <div class="accordion accordion-flush border rounded" id="accordionSedes">
                                         {% for grupo_empresa, lista_sedes in sedes_agrupadas.items %}
                                         <div class="accordion-item">
-                                            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                                                <button class="accordion-button collapsed py-2 px-3 small" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed py-2 px-3 small" type="button"
+                                                    data-bs-toggle="collapse" data-bs-target="#ac-{{ forloop.counter }}">
                                                     {{ grupo_empresa }}
                                                 </button>
                                             </h2>
-                                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordionSedes">
-                                                <div class="accordion-body p-0">
-                                                    <div class="list-group list-group-flush">
-                                                        {% for s in lista_sedes %}
-                                                        <button type="submit" name="sede_hist" value="{{ s.pk }}" class="list-group-item list-group-item-action py-2 px-4 small border-0 {% if sede_obj and s.pk == sede_obj.pk %}active text-white fw-bold{% endif %}">
-                                                            ↳ {{ s.nombre }}
-                                                        </button>
-                                                        {% endfor %}
-                                                    </div>
+                                            <div id="ac-{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordionSedes">
+                                                <div class="list-group list-group-flush">
+                                                    {% for s in lista_sedes %}
+                                                    <button type="submit" name="sede_hist" value="{{ s.pk }}"
+                                                        class="list-group-item list-group-item-action py-2 px-4 small border-0 {% if sede_obj and s.pk == sede_obj.pk %}active text-white fw-bold{% endif %}">
+                                                        ↳ {{ s.nombre }}
+                                                    </button>
+                                                    {% endfor %}
                                                 </div>
                                             </div>
                                         </div>
@@ -331,14 +478,16 @@
                         </div>
                     </div>
 
-                    <div class="col-md-9 transition-width" id="panelResultados">
+                    <div class="col-md-9" id="panelResultados">
                         {% if sede_obj %}
                         <div class="card shadow-sm border-0">
                             <div class="card-body p-4">
-                                <h5 class="text-secondary mb-3">Comportamiento Histórico: <strong class="text-primary">{{ sede_obj.nombre }}</strong> (Año {{ anio_hist }})</h5>
+                                <h6 class="text-secondary mb-3">
+                                    Comportamiento Histórico: <strong style="color:var(--color-accent);">{{ sede_obj.nombre }}</strong> ({{ anio_hist }})
+                                </h6>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-sm table-excel text-center m-0 w-100">
-                                        <thead class="table-primary">
+                                    <table class="table table-bordered table-sm table-excel text-center" id="tabla-historial">
+                                        <thead class="header-p">
                                             <tr>
                                                 <th>MES</th>
                                                 <th>{{ sede_obj.canal_primario.nombre|default:"SIN PRIMARIO" }} (PRINCIPAL)</th>
@@ -361,152 +510,192 @@
                             </div>
                         </div>
                         {% else %}
-                        <div class="alert alert-info shadow-sm d-flex align-items-center">
-                            <i class="me-2 fs-4">👈</i> Selecciona una sede en el menú lateral izquierdo para cargar su historial.
+                        <div class="alert alert-info shadow-sm">
+                            👈 Selecciona una sede en el menú lateral para cargar su historial.
                         </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="tab-pane fade" id="pills-individual" role="tabpanel">
-                <button id="btnToggleFiltro" class="btn btn-sm btn-outline-primary mb-3 shadow-sm fw-bold">
-                    <span id="iconoFiltro">◀</span> Ocultar Filtros
-                </button>
+        </div><!-- /tab-content -->
+    </div><!-- /container -->
 
-                <div class="row">
-                    <div class="col-md-3 transition-width" id="panelFiltros">
-                        <div class="card shadow-sm border-0 mb-3">
-                            <div class="card-header bg-primary text-white fw-bold">Filtros de Búsqueda</div>
-                            <div class="card-body p-3">
-                                <form method="GET" id="form-filtro-sede">
-                                    <label class="fw-bold text-secondary mb-1 small">Seleccionar Año:</label>
-                                    <select name="anio_hist" class="form-select form-select-sm mb-3" onchange="this.form.submit()">
-                                        <option value="2024" {% if anio_hist == 2024 %}selected{% endif %}>2024</option>
-                                        <option value="2025" {% if anio_hist == 2025 %}selected{% endif %}>2025</option>
-                                        <option value="2026" {% if anio_hist == 2026 %}selected{% endif %}>2026</option>
-                                    </select>
-                                    <label class="fw-bold text-secondary mb-2 small">Seleccionar Sede:</label>
-                                    <div class="accordion accordion-flush border rounded" id="accordionSedes">
-                                        {% for grupo_empresa, lista_sedes in sedes_agrupadas.items %}
-                                        <div class="accordion-item">
-                                            <h2 class="accordion-header">
-                                                <button class="accordion-button collapsed py-2 px-3 small" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}">
-                                                    {{ grupo_empresa }}
-                                                </button>
-                                            </h2>
-                                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" data-bs-parent="#accordionSedes">
-                                                <div class="list-group list-group-flush">
-                                                    {% for s in lista_sedes %}
-                                                    <button type="submit" name="sede_hist" value="{{ s.pk }}" class="list-group-item list-group-item-action py-2 px-4 small border-0 {% if sede_obj and s.pk == sede_obj.pk %}active text-white fw-bold{% endif %}">
-                                                        ↳ {{ s.nombre }}
-                                                    </button>
-                                                    {% endfor %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {% endfor %}
-                                    </div>
-                                </form>
-                            </div>
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- MODAL GRÁFICAS (Punto 4)                                   -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div class="modal fade" id="modalGraficas" tabindex="-1" aria-labelledby="lblModalGraficas" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header" style="background:var(--color-accent);">
+                    <h5 class="modal-title text-white fw-bold" id="lblModalGraficas">📊 Gráficas de Disponibilidad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="tabsGraficas" role="tablist">
+                        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#g-sedes"   type="button">Sedes</button></li>
+                        <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#g-canales" type="button">Proveedores</button></li>
+                        <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#g-mpls"    type="button">MPLS</button></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="g-sedes">
+                            <div class="chart-container"><canvas id="chartSedes"></canvas></div>
                         </div>
-                    </div>
-
-                    <div class="col-md-9 transition-width" id="panelResultados">
-                        {% if sede_obj %}
-                        <div class="card shadow-sm border-0">
-                            <div class="card-body p-4">
-                                <h5 class="text-secondary mb-3">Comportamiento Histórico: <strong class="text-primary">{{ sede_obj.nombre }}</strong> (Año {{ anio_hist }})</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-bordered table-sm table-excel text-center m-0 w-100">
-                                        <thead class="table-primary">
-                                            <tr>
-                                                <th>MES</th>
-                                                <th>{{ sede_obj.canal_primario.nombre|default:"SIN PRIMARIO" }}</th>
-                                                <th>{{ sede_obj.canal_secundario.nombre|default:"SIN RESPALDO" }}</th>
-                                                {% if sede_obj.canal_mpls %}<th>{{ sede_obj.canal_mpls.nombre }} (MPLS)</th>{% endif %}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for h in historico_sede %}
-                                            <tr>
-                                                <td class="fw-bold bg-light">{{ h.mes }}</td>
-                                                <td>{{ h.disp_p }}%</td>
-                                                <td>{{ h.disp_s }}%</td>
-                                                {% if sede_obj.canal_mpls %}<td>{{ h.disp_m }}%</td>{% endif %}
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                        <div class="tab-pane fade" id="g-canales">
+                            <div class="chart-container"><canvas id="chartCanales"></canvas></div>
                         </div>
-                        {% else %}
-                        <div class="alert alert-info shadow-sm">Selecciona una sede para cargar su historial.</div>
-                        {% endif %}
+                        <div class="tab-pane fade" id="g-mpls">
+                            <div class="chart-container"><canvas id="chartMpls"></canvas></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- SCRIPTS                                                     -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // 1. Detectar si estamos filtrando (si hay parámetros en la URL)
-            const urlParams = new URLSearchParams(window.location.search);
-            let tabToActivate = localStorage.getItem('lastTab');
+    // ── Persistir pestaña activa ──────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        let tabTarget   = localStorage.getItem('lastTab');
 
-            // Si la URL tiene 'sede_hist' o 'anio_hist', el usuario está en la pestaña 4
-            if (urlParams.has('sede_hist') || urlParams.has('anio_hist')) {
-                tabToActivate = '#pills-individual';
-            }
+        if (urlParams.has('sede_hist') || urlParams.has('anio_hist')) tabTarget = '#tab-historial';
 
-            // 2. Activar la pestaña correspondiente
-            if (tabToActivate) {
-                const triggerEl = document.querySelector(`button[data-bs-target="${tabToActivate}"]`);
-                if (triggerEl) {
-                    // Quitamos el 'active' de la primera pestaña por defecto para evitar saltos visuales
-                    document.querySelectorAll('.nav-link, .tab-pane').forEach(el => {
-                        el.classList.remove('active', 'show');
-                    });
+        if (tabTarget) {
+            document.querySelectorAll('.nav-link, .tab-pane').forEach(el => el.classList.remove('active','show'));
+            const btn = document.querySelector(`button[data-bs-target="${tabTarget}"]`);
+            if (btn) new bootstrap.Tab(btn).show();
+        }
 
-                    // Activamos la pestaña correcta
-                    const tab = new bootstrap.Tab(triggerEl);
-                    tab.show();
-                }
-            }
-
-            // 3. Guardar en localStorage cuando el usuario haga clic manualmente
-            document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(t => {
-                t.addEventListener('shown.bs.tab', e => {
-                    localStorage.setItem('lastTab', e.target.getAttribute('data-bs-target'));
-                });
-            });
-
-            // 4. Mantener abierto el acordeón de la sede seleccionada (Tu lógica actual mejorada)
-            const activeSede = document.querySelector('.list-group-item.active');
-            if (activeSede) {
-                const collapseParent = activeSede.closest('.accordion-collapse');
-                if (collapseParent) {
-                    const bsCollapse = new bootstrap.Collapse(collapseParent, { toggle: false });
-                    bsCollapse.show();
-                }
-            }
+        document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(t => {
+            t.addEventListener('shown.bs.tab', e => localStorage.setItem('lastTab', e.target.dataset.bsTarget));
         });
 
-        // Lógica del botón para contraer el menú lateral (Asegúrate de que este ID coincida con tu botón)
-        document.getElementById('btnToggleFiltro')?.addEventListener('click', function() {
-            let panelIzq = document.getElementById('panelFiltros');
-            let panelDer = document.getElementById('panelResultados');
+        // Abrir acordeón de la sede activa
+        const activeSede = document.querySelector('.list-group-item.active');
+        if (activeSede) {
+            const panel = activeSede.closest('.accordion-collapse');
+            if (panel) new bootstrap.Collapse(panel, { toggle: false }).show();
+        }
 
-            if (panelIzq.classList.contains('d-none')) {
-                panelIzq.classList.remove('d-none');
-                panelDer.classList.replace('col-md-12', 'col-md-9');
-                this.innerHTML = '<span id="iconoFiltro">◀</span> Ocultar Filtros';
+        // Toggle panel lateral
+        document.getElementById('btnToggleFiltro')?.addEventListener('click', function () {
+            const izq = document.getElementById('panelFiltros');
+            const der = document.getElementById('panelResultados');
+            if (izq.classList.contains('d-none')) {
+                izq.classList.remove('d-none');
+                der.className = 'col-md-9';
+                this.innerHTML = '◀ Ocultar Filtros';
             } else {
-                panelIzq.classList.add('d-none');
-                panelDer.classList.replace('col-md-9', 'col-md-12');
-                this.innerHTML = '<span id="iconoFiltro">▶</span> Mostrar Filtros';
+                izq.classList.add('d-none');
+                der.className = 'col-md-12';
+                this.innerHTML = '▶ Mostrar Filtros';
             }
         });
+
+        // Inicializar gráficas al abrir el modal
+        document.getElementById('modalGraficas').addEventListener('shown.bs.modal', inicializarGraficas);
+    });
+
+    // ── Exportar a Excel (SheetJS) — Punto 5 ─────────────────────
+    function exportarTabla(tablaId, nombreArchivo) {
+        const tabla = document.getElementById(tablaId);
+        if (!tabla) return;
+        const wb  = XLSX.utils.table_to_book(tabla, { sheet: nombreArchivo });
+        XLSX.writeFile(wb, nombreArchivo + '.xlsx');
+    }
+
+    // ── Gráficas con Chart.js — Punto 4 ──────────────────────────
+    let graficasInicializadas = false;
+
+    function inicializarGraficas() {
+        if (graficasInicializadas) return;
+        graficasInicializadas = true;
+
+        const META = {{ meta_global }};
+
+        // Datos desde Django
+        const dataSedes = {
+            labels: [{% for f in reporte %}"{{ f.sede }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+            primario:   [{% for f in reporte %}{{ f.disp_p }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            secundario: [{% for f in reporte %}{{ f.disp_s }}{% if not forloop.last %},{% endif %}{% endfor %}],
+        };
+
+        const dataCanales = {
+            labels: [{% for c in canales %}"{{ c.nombre }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+            valores: [{% for c in canales %}{{ c.disp }}{% if not forloop.last %},{% endif %}{% endfor %}],
+        };
+
+        const dataMpls = {
+            labels: [{% for m in reporte_mpls %}"{{ m.sede }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+            valores: [{% for m in reporte_mpls %}{{ m.disp }}{% if not forloop.last %},{% endif %}{% endfor %}],
+        };
+
+        const lineaMeta = (len) => ({ label: 'Meta SLA', data: Array(len).fill(META), borderColor: '#ef4444', borderDash: [6,3], borderWidth: 2, pointRadius: 0, type: 'line', order: 0 });
+
+        // Gráfica Sedes
+        new Chart(document.getElementById('chartSedes'), {
+            type: 'bar',
+            data: {
+                labels: dataSedes.labels,
+                datasets: [
+                    { label: 'Canal Primario %',   data: dataSedes.primario,   backgroundColor: 'rgba(59,130,246,0.7)' },
+                    { label: 'Canal Secundario %',  data: dataSedes.secundario, backgroundColor: 'rgba(16,185,129,0.7)' },
+                    lineaMeta(dataSedes.labels.length)
+                ]
+            },
+            options: opcionesBase('Disponibilidad por Sede (%)')
+        });
+
+        // Gráfica Proveedores
+        new Chart(document.getElementById('chartCanales'), {
+            type: 'bar',
+            data: {
+                labels: dataCanales.labels,
+                datasets: [
+                    { label: 'Disponibilidad %', data: dataCanales.valores, backgroundColor: 'rgba(47,93,109,0.75)' },
+                    lineaMeta(dataCanales.labels.length)
+                ]
+            },
+            options: opcionesBase('Disponibilidad Global por Proveedor (%)')
+        });
+
+        // Gráfica MPLS
+        new Chart(document.getElementById('chartMpls'), {
+            type: 'bar',
+            data: {
+                labels: dataMpls.labels,
+                datasets: [
+                    { label: 'Disponibilidad MPLS %', data: dataMpls.valores, backgroundColor: 'rgba(168,85,247,0.7)' },
+                    lineaMeta(dataMpls.labels.length)
+                ]
+            },
+            options: opcionesBase('Rendimiento MPLS por Sede (%)')
+        });
+    }
+
+    function opcionesBase(titulo) {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title:   { display: true, text: titulo, font: { size: 14 } },
+                legend:  { position: 'top' },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}%` } }
+            },
+            scales: {
+                y: { min: 90, max: 100, ticks: { callback: v => v + '%' } }
+            }
+        };
+    }
     </script>
+
 </body>
+</html>
