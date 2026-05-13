@@ -1,47 +1,131 @@
 /* ==========================================================================
-FILTROS LATERALES
-========================================================================== */
+   NAVIGATION_ADMIN.CSS — FILTROS LATERALES Y NAVEGACIÓN
+   ========================================================================== */
 
+/* PANEL DE FILTROS */
 #changelist-filter {
-    background-color: #ffffff;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
+    width: 260px;
+    float: right;
+    margin-left: 20px;
+    background: #ffffff !important;
+    border-left: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text) !important;
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
+/* Título principal del panel de filtros */
+#changelist-filter h2 {
+    background: var(--color-accent) !important;
+    color: #ffffff !important;
+    padding: 8px 12px;
+    margin: 0;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+/* Secciones de filtro */
 #changelist-filter h3 {
-    color: #1e293b;
-    border-bottom: 2px solid var(--color-primary);
+    color: var(--color-text) !important;
+    border-bottom: 2px solid var(--color-primary) !important;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+    background: var(--color-primary-light) !important;
+}
+
+#changelist-filter ul {
+    padding: 4px 12px 8px;
+    margin: 0;
+    background: #ffffff !important;
+}
+
+#changelist-filter li {
+    list-style: none;
+    padding: 3px 0;
+}
+
+#changelist-filter li a {
+    color: var(--color-text-muted) !important;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+
+#changelist-filter li a:hover {
+    color: var(--color-primary) !important;
 }
 
 #changelist-filter li.selected a {
-    color: var(--color-primary);
-    border-left: 3px solid var(--color-primary);
-}
-
-#btn-toggle-filtros {
-    background: #e2e8f0;
-    border: 1px solid #1e293b;
-    padding: 5px 10px;
+    color: var(--color-primary) !important;
     font-weight: bold;
+    border-left: 3px solid var(--color-primary);
+    padding-left: 6px;
+}
+
+/* BOTÓN TOGGLE FILTROS — Creado por JS */
+#btn-toggle-filtros {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--color-accent);
+    color: #ffffff;
+    padding: 6px 14px;
+    border: none;
+    border-radius: var(--radius-sm);
     cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s ease;
+    margin-bottom: 10px;
 }
 
-/* panel filtro visible bonito */
-#changelist-filter {
-    transition: all 0.3s ease;
+#btn-toggle-filtros:hover {
+    background: var(--color-primary-dark);
 }
 
-#nav-sidebar {
-    background: #f1f5f9;
+/* Estado oculto del filtro (JS togglea esta clase) */
+#changelist-filter.filtro-oculto {
+    display: none !important;
 }
 
-/* item activo */
-#nav-sidebar .current-model {
-    background: #eae5a0;
+/* Rangefilter — forzar colores en modo claro */
+.rangefilter-container input[type="text"] {
+    background: #ffffff !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    font-size: 0.82rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 4px;
 }
 
-/* títulos */
-#nav-sidebar caption {
-    background: #9aa6b2;
-    color: white;
+.rangefilter-container label {
+    color: var(--color-text) !important;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.rangefilter-container input[type="submit"] {
+    background: var(--color-primary) !important;
+    color: #ffffff !important;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 5px 12px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.rangefilter-container input[type="submit"]:hover {
+    background: var(--color-primary-hover) !important;
 }

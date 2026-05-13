@@ -1,29 +1,134 @@
 /* ==========================================================================
-CUSTOM POR MODELO (ESCALABLE DRY)
-========================================================================== */
+   OVERRIDES_ADMIN.CSS — ANULACIONES ESPECÍFICAS DE DJANGO ADMIN
+   ========================================================================== */
 
-/* EVENTO → acciones a la derecha */
-body.model-evento .actions {
-    display: flex;
-    justify-content: flex-end;
+/* ------------------------------------------------------------------
+   FORZAR MODO CLARO ABSOLUTO
+   ------------------------------------------------------------------ */
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] #container,
+html[data-theme="dark"] #header,
+html[data-theme="dark"] #content,
+html[data-theme="dark"] #nav-sidebar,
+html[data-theme="dark"] .module,
+html[data-theme="dark"] fieldset,
+html[data-theme="dark"] .form-row,
+html[data-theme="dark"] table,
+html[data-theme="dark"] th,
+html[data-theme="dark"] td,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+    background-color: unset !important;
+    color: unset !important;
+    border-color: unset !important;
 }
 
-/* SEDE → margen personalizado */
-body.model-sede .actions {
-    margin-left: 20px;
+/* Ocultar botón de tema (sol/luna) */
+.theme-toggle,
+button.theme-toggle,
+[title="Toggle theme"],
+[aria-label="Toggle theme"] {
+    display: none !important;
 }
 
-/* EMPRESA → ajustes de posición */
-body.model-empresa .actions {
-    position: relative;
-    top: -5px;
-}
-
-/* ocultar iconos agregar / editar */
-.addlink,
-.changelink,
+/* ------------------------------------------------------------------
+   OCULTAR SOLO los iconos de relación (ojo, lápiz junto a FK)
+   PERO NO el botón "Añadir X" del índice (a.addlink en índice)
+   ------------------------------------------------------------------ */
+/* Iconos inline en formularios (junto a select de FK) */
 a.add-related,
 a.change-related,
-a.viewlink {
+a.view-related,
+a.delete-related,
+/* Iconos en columnas de tabla de lista */
+td a.changelink,
+td a.viewlink,
+th a.changelink {
+    display: none !important;
+}
+
+/* NOTA: La regla p.datetime fue eliminada de este archivo.
+   Toda la estilización de los campos fecha/hora del Evento vive ahora
+   en components_admin.css (sección "FIX #1 — FORMULARIO EVENTO"). */
+
+/* ------------------------------------------------------------------
+   BRANDING — Logo Grupo Carval
+   ------------------------------------------------------------------ */
+#branding {
+    display: flex;
+    align-items: center;
+    background-image: url('/static/images/GrupoCarval.png');
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: contain;
+    min-width: 220px;
+    height: 50px;
+    text-indent: -9999px;
+}
+
+#branding h1 { display: none !important; }
+
+/* ------------------------------------------------------------------
+   USER TOOLS - colores
+   ------------------------------------------------------------------ */
+#user-tools { color: #000000 !important; }
+#user-tools a { color: #000000 !important; font-weight: bold; }
+#user-tools a:hover { color: var(--color-accent) !important; }
+
+/* ------------------------------------------------------------------
+   CAMPOS SOLO-LECTURA (duracion_horas, duracion_minutos)
+   ------------------------------------------------------------------ */
+input[name="duracion_horas"],
+input[name="duracion_minutos"] {
+    background: #f1f5f9 !important;
+    color: var(--color-text-muted) !important;
+    cursor: not-allowed !important;
+    border: 1px dashed var(--color-border) !important;
+    pointer-events: none;
+}
+
+/* ------------------------------------------------------------------
+   MENSAJES DE ALERTA
+   ------------------------------------------------------------------ */
+.messagelist li {
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+.messagelist li.success { background: var(--color-primary-light) !important; color: var(--color-primary-dark) !important; border-left: 4px solid var(--color-primary); }
+.messagelist li.warning { background: #fef3c7 !important; color: #92400e !important; border-left: 4px solid #f59e0b; }
+.messagelist li.error   { background: #fee2e2 !important; color: #991b1b !important; border-left: 4px solid #ef4444; }
+
+/* ------------------------------------------------------------------
+   SEARCH BAR
+   ------------------------------------------------------------------ */
+#searchbar {
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 6px 10px !important;
+    background: #ffffff !important;
+    color: var(--color-text) !important;
+}
+#changelist-search input[type="submit"] {
+    background: var(--color-primary) !important;
+    color: #ffffff !important;
+}
+
+/* ------------------------------------------------------------------
+   OCULTAR barra "Empiece a escribir para filtrar..." del nav-sidebar
+   ------------------------------------------------------------------ */
+#nav-filter,
+#nav-sidebar .sticky {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------------
+   OCULTAR EnlaceDashboard del menú lateral
+   ------------------------------------------------------------------ */
+#nav-sidebar a[href*="enlacedashboard"],
+th.column-nombre a[href*="enlacedashboard"] {
     display: none !important;
 }

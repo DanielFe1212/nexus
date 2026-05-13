@@ -1,128 +1,380 @@
 /* ==========================================================================
-TABLAS
-========================================================================== */
+   COMPONENTS_ADMIN.CSS — TABLAS, FORMULARIOS, BOTONES, DROPDOWNS
+   ========================================================================== */
 
+/* ------------------------------------------------------------------
+   TABLAS
+   ------------------------------------------------------------------ */
 #changelist table {
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-md);
+    background: #ffffff !important;
 }
 
 #result_list thead th {
-    background-color: var(--color-header-bg);
-    color: white;
+    background: var(--color-accent) !important;
+    color: #ffffff !important;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 10px 12px;
+    border: none !important;
+}
+
+#result_list thead th a,
+#result_list thead th a:visited {
+    color: #ffffff !important;
 }
 
 #result_list tbody tr:nth-child(odd) {
-    background-color: #f8fafc;
-}
-
-#result_list tbody tr:hover {
-    background-color: #e0f2fe;
-}
-
-/* ==========================================================================
-BOTONES
-========================================================================== */
-
-button,
-.button,
-input[type=submit] {
-    background-color: var(--color-primary);
-    border-radius: 6px;
-    border: none;
-    padding: 8px 14px;
-    color: white;
-    font-weight: 600;
-    transition: 0.3s;
-}
-
-button:hover {
-    background-color: var(--color-primary-hover);
-}
-
-/* ==========================================================================
-INPUTS
-========================================================================== */
-
-input, select, textarea {
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    padding: 5px;
-    background-color: #ffffff;
-}
-
-/* BARRA DE ACCIONES */
-.actions {
-    background: transparent;
-    padding: 10px 0;
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* BOTÓN ELIMINAR */
-.actions select {
-    display: none; /* oculta dropdown default */
-}
-
-/* BOTÓN personalizado eliminar */
-.btn-eliminar-custom {
-    background-color: #10b981;
-    color: white;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-}
-
-#result_list thead th {
-    background: #1e293b;
-    color: white;
-}
-
-#result_list tbody tr {
-    background: #f1f5f9;
+    background: #f8fafc !important;
+    color: var(--color-text) !important;
 }
 
 #result_list tbody tr:nth-child(even) {
-    background: #e2e8f0;
+    background: #ffffff !important;
+    color: var(--color-text) !important;
 }
 
-/* Oculta dropdown original */
-.actions select {
-    display: none;
+#result_list tbody tr:hover {
+    background: #e0f2fe !important;
 }
 
-/* Oculta botón default */
-.actions button[name="index"] {
-    display: none;
+#result_list tbody td {
+    color: var(--color-text) !important;
+    font-size: 0.85rem;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--color-border);
 }
 
-/* BOTÓN PERSONALIZADO */
+/* Paginador */
+.paginator {
+    background: #ffffff !important;
+    border-top: 1px solid var(--color-border) !important;
+    padding: 8px 12px;
+    color: var(--color-text) !important;
+}
+
+.paginator a {
+    color: var(--color-primary) !important;
+    font-weight: 600;
+}
+
+/* ------------------------------------------------------------------
+   BARRA DE ACCIONES (boton eliminar)
+   ------------------------------------------------------------------ */
+.actions {
+    display: block !important;
+    margin: 10px 0;
+    background: #ffffff !important;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+}
+
+/* Ocultar select nativo y botón nativo de acciones */
+.actions select,
+.actions button[name="index"],
+.actions label {
+    display: none !important;
+}
+
+/* Botón eliminar personalizado */
 .btn-eliminar-custom {
-    background-color: #10b981;
-    color: white;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-weight: bold;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    padding: 6px 16px;
+    border-radius: var(--radius-sm);
     border: none;
+    font-weight: 700;
     cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.2s ease;
 }
 
 .btn-eliminar-custom:hover {
-    background-color: #059669;
+    background-color: #b91c1c;
 }
 
-#changelist {
-    display: flex;
+/* ------------------------------------------------------------------
+   FORMULARIOS
+   ------------------------------------------------------------------ */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+select,
+textarea {
+    background-color: #ffffff !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 6px 8px !important;
+    font-size: 0.87rem;
 }
 
-#changelist-form {
-    flex: 1;
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--color-primary) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
 }
 
-#changelist-filter {
-    width: 260px;
+.form-row {
+    background: #ffffff !important;
+    border-bottom: 1px solid var(--color-border);
+    padding: 10px 14px;
+    color: var(--color-text) !important;
+}
+
+fieldset {
+    background: #ffffff !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md);
+    padding: 12px !important;
+    color: var(--color-text) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────
+   FIX #1 — Encabezados de fieldset (legend, h2) SIN fondo verde
+   Antes tenían background var(--color-primary-light) — eso era el
+   "verde debajo de Fecha Inicio / Fecha Fin".
+   Ahora son neutros, solo con borde sutil.
+   ────────────────────────────────────────────────────────────────── */
+fieldset legend,
+fieldset h2,
+fieldset.module h2 {
+    background: transparent !important;
+    color: var(--color-text) !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    padding: 6px 12px !important;
+    border-radius: 0 !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+}
+
+label {
+    color: var(--color-text) !important;
+    font-weight: 600;
+    font-size: 0.87rem;
+}
+
+/* Help text */
+.help {
+    color: var(--color-text-muted) !important;
+    font-size: 0.78rem;
+}
+
+/* ------------------------------------------------------------------
+   BOTONES GLOBALES
+   ------------------------------------------------------------------ */
+.button,
+input[type="submit"],
+input[type="button"],
+.submit-row input,
+a.button {
+    background-color: var(--color-primary) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.button:hover,
+input[type="submit"]:hover {
+    background-color: var(--color-primary-hover) !important;
+}
+
+.submit-row {
+    background: #f8fafc !important;
+    border-top: 1px solid var(--color-border);
+    padding: 12px;
+}
+
+/* Botón eliminar (delete) en rojo */
+.submit-row a.deletelink {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+    border-radius: var(--radius-sm);
+    padding: 8px 16px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* ------------------------------------------------------------------
+   MÓDULOS / CARDS
+   ------------------------------------------------------------------ */
+.module {
+    background: #ffffff !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text) !important;
+}
+
+.module h2, .module caption {
+    background: var(--color-accent) !important;
+    color: #ffffff !important;
+    padding: 8px 14px;
+    font-size: 0.88rem;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+/* ------------------------------------------------------------------
+   HEADER — BIENVENIDA Y BOTÓN DASHBOARD
+   ------------------------------------------------------------------ */
+.btn-dashboard {
+    background-color: var(--color-primary) !important;
+    color: #ffffff !important;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    transition: background 0.2s;
+}
+
+.btn-dashboard:hover {
+    background-color: var(--color-primary-hover) !important;
+    color: #ffffff !important;
+}
+
+/* Dropdown de usuario */
+.user-menu-container {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+}
+
+.user-icon-btn {
+    background: transparent !important;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.user-dropdown-content {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background: #ffffff;
+    border: 2px solid var(--color-primary);
+    border-radius: var(--radius-md);
+    padding: 8px;
+    min-width: 180px;
+    box-shadow: var(--shadow-md);
+    z-index: 1000;
+}
+
+.user-dropdown-content a {
+    color: var(--color-primary-dark) !important;
+    padding: 8px 10px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.85rem;
+    display: block;
+    border-radius: var(--radius-sm);
+}
+
+.user-dropdown-content a:hover {
+    background: var(--color-primary-light);
+}
+
+.logout-btn {
+    background: none !important;
+    border: none !important;
+    color: var(--color-primary-dark) !important;
+    font-weight: 500 !important;
+    padding: 8px 10px !important;
+    text-align: left !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    font-family: inherit !important;
+    font-size: 0.85rem !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.logout-btn:hover {
+    background: var(--color-primary-light) !important;
+}
+
+/* ------------------------------------------------------------------
+   DURACIÓN — Solo lectura (no editable)
+   ------------------------------------------------------------------ */
+.campo-solo-lectura {
+    background: #f1f5f9 !important;
+    color: var(--color-text-muted) !important;
+    cursor: not-allowed !important;
+    border: 1px dashed var(--color-border) !important;
+}
+
+/* ==================================================================
+   FIX #1 — FORMULARIO EVENTO: fecha/hora compactos, sin verde residual
+   Reescrito desde cero. La regla `p.datetime` queda definida UNA VEZ.
+   ================================================================== */
+
+/* 1) Labels del form-row — limpios, sin fondos parásitos */
+.form-row > div > label,
+.form-row label.required,
+.field-fecha_inicio label,
+.field-fecha_fin label {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: var(--color-text) !important;
+    border: none !important;
+    border-bottom: none !important;
+    padding: 0 0 4px 0 !important;
+    margin: 0 !important;
     display: block !important;
+    font-weight: 600 !important;
+}
+
+/* 2) Contenedor p.datetime — fila compacta, sin wrap */
+p.datetime {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+/* 3) Inputs de fecha y hora — anchos compactos */
+p.datetime input.vDateField {
+    width: 105px !important;
+    padding: 4px 6px !important;
+    margin: 0 !important;
+}
+
+p.datetime input.vTimeField {
+    width: 75px !important;
+    padding: 4px 6px !important;
+    margin: 0 !important;
+}
+
+/* 4) Etiquetas "Fecha:" / "Hora:" inline, sin saltos */
+p.datetime > span {
+    font-size: 0.82rem !important;
+    color: var(--color-text-muted) !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 5) Ocultar atajos nativos de Django (Hoy / Ahora / timezone) */
+.datetimeshortcuts,
+p.datetime span.timezonewarning {
+    display: none !important;
 }

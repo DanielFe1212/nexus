@@ -1,63 +1,60 @@
 /* ==========================================================================
-HEADER Y BRANDING (SIN ROMPER DJANGO)
-========================================================================== */
-
-#header {
-    background: var(--gradiente-header);
-    color: var(--color-header-text);
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* LOGO */
-#branding {
-    display: flex;
-    align-items: center;
-}
-
-/* SIDEBAR */
-#nav-sidebar {
-    background-color: #f1f5f9;
-    border-right: 2px solid var(--color-border);
-}
-
-/* CONTENIDO */
-#content {
-    padding: 10px;
-}
-
-#changelist {
-    display: flex;
-    gap: 20px;
-}
-
-/* tabla */
-#changelist-form {
-    flex: 1;
-}
-
-/* filtros */
-#changelist-filter {
-    width: 260px;
-}
+   LAYOUT_ADMIN.CSS — ESTRUCTURA Y CONTENEDORES
+   ========================================================================== */
 
 #container {
-    background: transparent !important;
+    min-height: 100vh;
 }
 
-/* contenido blanco encima del gradiente */
-#content {
-    background: rgba(255,255,255,0.85);
-    border-radius: 8px;
-}
-
+/* HEADER */
 #header {
-    background: linear-gradient(90deg, #e5e7eb, #10b981);
+    background: var(--gradiente-header) !important;
     padding: 15px 25px;
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text) !important;
 }
 
-/* texto usuario */
-#user-tools {
-    color: black;
-    font-size: 13px;
+/* BARRA DE BREADCRUMBS */
+.breadcrumbs {
+    background: var(--color-accent) !important;
+    color: #ffffff !important;
+    padding: 8px 20px;
+    font-size: 0.85rem;
+}
+
+.breadcrumbs a {
+    color: #a7f3d0 !important;
+}
+
+/* CONTENIDO PRINCIPAL */
+#content {
+    background: rgba(255, 255, 255, 0.88) !important;
+    padding: 20px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text) !important;
+}
+
+/* SIDEBAR IZQUIERDA */
+#nav-sidebar {
+    background: var(--color-bg-sidebar) !important;
+    border-right: 2px solid var(--color-border);
+    color: var(--color-text) !important;
+}
+
+#nav-sidebar caption {
+    background: #cbd5e1 !important;
+    color: #334155 !important;
+    font-weight: bold;
+    border-radius: var(--radius-sm);
+}
+
+#nav-sidebar a {
+    color: var(--color-text) !important;
+}
+
+#nav-sidebar .current-model,
+#nav-sidebar .current-app {
+    background: var(--color-primary-light) !important;
+    color: var(--color-primary-dark) !important;
 }

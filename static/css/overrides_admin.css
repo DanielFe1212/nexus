@@ -49,10 +49,9 @@ th a.changelink {
     display: none !important;
 }
 
-/* Atajos de fecha/hora nativos de Django (reemplazados por flatpickr) */
-.datetimeshortcuts        { display: none !important; }
-p.datetime                { display: flex; flex-wrap: wrap; gap: 10px; }
-p.datetime span.timezonewarning { display: none !important; }
+/* NOTA: La regla p.datetime fue eliminada de este archivo.
+   Toda la estilización de los campos fecha/hora del Evento vive ahora
+   en components_admin.css (sección "FIX #1 — FORMULARIO EVENTO"). */
 
 /* ------------------------------------------------------------------
    BRANDING — Logo Grupo Carval

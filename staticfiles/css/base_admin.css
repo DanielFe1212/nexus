@@ -1,42 +1,60 @@
 /* ==========================================================================
-BASE GLOBAL - VARIABLES Y GRADIENTES (CORE DESIGN SYSTEM)
-========================================================================== */
+   BASE_ADMIN.CSS — DESIGN SYSTEM CORE
+   Variables, colores, tipografía, gradientes. Forzado siempre en modo claro.
+   ========================================================================== */
 
+/* Forzar modo claro independientemente del navegador */
 :root {
-    /* COLORES BASE */
-    --color-primary: #10b981;
-    --color-primary-hover: #0284c7;
-    --color-bg-page: #f8fafc;
-    --color-header-bg: #1e293b;
-    --color-header-text: #000000;
-    --color-border: #e2e8f0;
+    color-scheme: light !important;
 
-    /* IDENTIDAD */
-    --verde-claro: #10b981;
-    --blanco: #ffffff;
+    /* PALETA PRINCIPAL */
+    --color-primary:        #10b981;
+    --color-primary-hover:  #059669;
+    --color-primary-dark:   #065f46;
+    --color-primary-light:  #d1fae5;
+    --color-accent:         #2f5d6d;
+
+    /* NEUTROS */
+    --color-bg-page:        #f0f7f4;
+    --color-bg-card:        #ffffff;
+    --color-bg-sidebar:     #f1f5f9;
+    --color-border:         #e2e8f0;
+    --color-text:           #1e293b;
+    --color-text-muted:     #64748b;
 
     /* GRADIENTES */
-    --gradiente-header: linear-gradient(90deg, #10b981, #ffffff);
-    --gradiente-body: linear-gradient(180deg, #f8fafc, #ffffff);
+    --gradiente-header:     linear-gradient(90deg, #e5e7eb 0%, #10b981 100%);
+    --gradiente-body:       linear-gradient(180deg, #c7e3d3 0%, #f8fafc 100%);
+
+    /* SOMBRAS */
+    --shadow-sm:            0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md:            0 4px 6px rgba(0,0,0,0.07);
+
+    /* RADIOS */
+    --radius-sm:            4px;
+    --radius-md:            8px;
+}
+
+/* ANULAR modo oscuro del sistema operativo/navegador completamente */
+@media (prefers-color-scheme: dark) {
+    html, body, #container, #content, #nav-sidebar,
+    #changelist-filter, .module, fieldset, .form-row,
+    input, select, textarea, table, th, td {
+        background-color: unset !important;
+        color: unset !important;
+        border-color: unset !important;
+    }
 }
 
 /* FONDO GLOBAL */
-body {
-    background: var(--gradiente-body);
-    background-attachment: fixed;
-    min-height: 100vh;
-}
-
 html, body {
-    height: 100%;
+    background: var(--gradiente-body) !important;
+    background-attachment: fixed !important;
+    min-height: 100vh !important;
+    color: var(--color-text) !important;
 }
 
-body {
-    background: linear-gradient(180deg, #c7e3d3, #f8fafc) !important;
-    min-height: 100vh;
-}
-
-/* contenedor global */
-#container {
+#container, #content, .content, .dashboard {
     background: transparent !important;
+    color: var(--color-text) !important;
 }

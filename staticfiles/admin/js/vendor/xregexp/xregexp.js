@@ -2196,7 +2196,7 @@ fixed.replace = function (search, replacement) {
           }
 
           return args[dollarToken] || '';
-        } // `$` followed by an unsupported char is an error, unlike native js
+        } // `$` followed by an unsupported char is an error, unlike native JS
 
 
         throw new SyntaxError("Invalid token ".concat($0));
