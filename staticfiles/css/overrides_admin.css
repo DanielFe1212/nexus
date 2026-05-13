@@ -34,24 +34,27 @@ button.theme-toggle,
 }
 
 /* ------------------------------------------------------------------
-   OCULTAR SOLO los iconos de relación (ojo, lápiz junto a FK)
-   PERO NO el botón "Añadir X" del índice (a.addlink en índice)
+   OCULTAR iconos de relación (ojo, lápiz junto a FK)
    ------------------------------------------------------------------ */
-/* Iconos inline en formularios (junto a select de FK) */
 a.add-related,
 a.change-related,
 a.view-related,
 a.delete-related,
-/* Iconos en columnas de tabla de lista */
 td a.changelink,
 td a.viewlink,
 th a.changelink {
     display: none !important;
 }
 
-/* NOTA: La regla p.datetime fue eliminada de este archivo.
-   Toda la estilización de los campos fecha/hora del Evento vive ahora
-   en components_admin.css (sección "FIX #1 — FORMULARIO EVENTO"). */
+/* ==================================================================
+   PUNTO 5 — Ocultar TODOS los "+ Añadir" del sidebar y del índice
+   ================================================================== */
+#nav-sidebar a.addlink,
+#content-main .module a.addlink,
+table caption a.addlink,
+.module table caption a.addlink {
+    display: none !important;
+}
 
 /* ------------------------------------------------------------------
    BRANDING — Logo Grupo Carval
@@ -67,7 +70,6 @@ th a.changelink {
     height: 50px;
     text-indent: -9999px;
 }
-
 #branding h1 { display: none !important; }
 
 /* ------------------------------------------------------------------
@@ -76,6 +78,22 @@ th a.changelink {
 #user-tools { color: #000000 !important; }
 #user-tools a { color: #000000 !important; font-weight: bold; }
 #user-tools a:hover { color: var(--color-accent) !important; }
+
+/* ==================================================================
+   PUNTO 6 — Botón "IR AL DASHBOARD KPI" en gris-azulado (#3a5a6b)
+   ================================================================== */
+.btn-dashboard,
+a.btn-dashboard,
+#user-tools .btn-dashboard {
+    background-color: #3a5a6b !important;
+    color: #ffffff !important;
+}
+.btn-dashboard:hover,
+a.btn-dashboard:hover,
+#user-tools .btn-dashboard:hover {
+    background-color: #2c4654 !important;     /* tono ligeramente más oscuro al hover */
+    color: #ffffff !important;
+}
 
 /* ------------------------------------------------------------------
    CAMPOS SOLO-LECTURA (duracion_horas, duracion_minutos)
@@ -131,4 +149,42 @@ input[name="duracion_minutos"] {
 #nav-sidebar a[href*="enlacedashboard"],
 th.column-nombre a[href*="enlacedashboard"] {
     display: none !important;
+}
+
+/* ==================================================================
+   PUNTO 1 — Widgets nativos de fecha y hora (SplitDateTimeWidget)
+   ==================================================================
+   El form de Evento ahora usa <input type="date"> y <input type="time">
+   nativos del navegador → calendario y reloj propios del SO/browser.
+
+   Aquí solo damos estilo y resolvemos el spacing.
+   ================================================================== */
+
+/* Contenedor de los 2 inputs (date + time) del SplitDateTimeWidget */
+.field-fecha_inicio .splitdatetime,
+.field-fecha_fin    .splitdatetime,
+.form-row.field-fecha_inicio,
+.form-row.field-fecha_fin {
+    display: block !important;
+}
+
+/* El widget renderiza los 2 inputs separados — los unimos en línea */
+input.input-fecha-nativo,
+input.input-hora-nativo {
+    display: inline-block !important;
+    vertical-align: middle !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 5px 8px !important;
+    font-size: 0.87rem !important;
+    margin: 0 4px 0 0 !important;
+    background: #ffffff !important;
+}
+
+input.input-fecha-nativo { width: 145px !important; }
+input.input-hora-nativo  { width: 110px !important; }
+
+/* Quitar el spacing residual entre los inputs split */
+.form-row > div > input + input {
+    margin-left: 4px !important;
 }

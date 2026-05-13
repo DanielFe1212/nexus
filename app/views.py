@@ -10,6 +10,8 @@ Propósito:
 """
 
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
 from django.db.models import Q, Prefetch
 from datetime import datetime
@@ -295,3 +297,34 @@ def dashboard_kpi(request):
         'reporte_mpls':     reporte_mpls,
         'canales_mpls':     canales_mpls,
     })
+
+
+# ============================================================================
+# API — Proveedores asignados a una sede (para filtro dinámico en form Evento)
+# ============================================================================
+
+@staff_member_required
+def proveedores_de_sede(request, sede_id):
+    """
+    Devuelve los proveedores asignados a una sede como JSON.
+    Lo consume el JS evento_proveedores.js que filtra el select de
+    Idproveedor según la Idsede elegida por el operador.
+
+    Endpoint: GET /admin/api/proveedores-de-sede/<id_sede>/
+    Respuesta: {"proveedores": [{"id": 1, "nombre": "Cirion"}, ...]}
+    """
+    try:
+        sede = Sede.objects.select_related(
+            'canal_primario', 'canal_secundario', 'canal_mpls'
+        ).get(pk=sede_id)
+    except Sede.DoesNotExist:
+        return JsonResponse({'proveedores': []})
+
+    proveedores = []
+    vistos = set()
+    for canal in (sede.canal_primario, sede.canal_secundario, sede.canal_mpls):
+        if canal and canal.pk not in vistos:
+            proveedores.append({'id': canal.pk, 'nombre': canal.nombre})
+            vistos.add(canal.pk)
+
+    return JsonResponse({'proveedores': proveedores})

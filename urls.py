@@ -16,6 +16,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/app/dashboard/', views.dashboard_kpi, name='dashboard_kpi'),
+    path('admin/api/proveedores-de-sede/<int:sede_id>/',
+         views.proveedores_de_sede,
+         name='proveedores_de_sede'),
     path('admin/', admin.site.urls),
 ]
 

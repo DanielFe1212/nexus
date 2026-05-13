@@ -12,6 +12,7 @@ Propósito:
 
 from django.contrib import admin
 from django.shortcuts import redirect
+from django import forms
 from rangefilter.filters import DateRangeFilterBuilder
 
 from .models import (
@@ -153,12 +154,42 @@ class SedeAdmin(BaseNexusAdmin):
 
 # ==============================================================================
 # EVENTO
+# PUNTO 1: Widgets nativos del navegador para fecha y hora
+# PUNTO 2: Filtrado dinámico de Idproveedor según Idsede seleccionada
 # PUNTO 5: Permisos por propietario
 # PUNTO 6: Auditoría heredada de BaseNexusAdmin + auto-asignar creado_por
 # ==============================================================================
 
+class EventoForm(forms.ModelForm):
+    """
+    Form personalizado para el Evento.
+    Usa los widgets HTML5 nativos del navegador para fecha y hora:
+        - <input type="date">  → calendario nativo del navegador
+        - <input type="time">  → reloj nativo del navegador
+    Ventajas:
+      - UX consistente con el navegador del operador (Chrome/Edge/Firefox).
+      - No depende del jQuery del admin antiguo de Django.
+      - Mejor accesibilidad y soporte móvil.
+    """
+    class Meta:
+        model  = Evento
+        fields = '__all__'
+        widgets = {
+            'fecha_inicio': forms.SplitDateTimeWidget(
+                date_attrs={'type': 'date', 'class': 'input-fecha-nativo'},
+                time_attrs={'type': 'time', 'class': 'input-hora-nativo', 'step': 60},
+            ),
+            'fecha_fin': forms.SplitDateTimeWidget(
+                date_attrs={'type': 'date', 'class': 'input-fecha-nativo'},
+                time_attrs={'type': 'time', 'class': 'input-hora-nativo', 'step': 60},
+            ),
+        }
+
+
 @admin.register(Evento)
 class EventoAdmin(BaseNexusAdmin):
+
+    form = EventoForm                                       # Punto 1 — widgets nativos
 
     list_display = (
         'get_empresa', 'idsede', 'idproveedor', 'rol',
@@ -178,7 +209,7 @@ class EventoAdmin(BaseNexusAdmin):
         ('fecha_fin',    DateRangeFilterBuilder(title='Rango de Fecha Fin')),
     )
 
-    ordering     = ('-fecha_inicio',)
+    ordering        = ('-fecha_inicio',)
     readonly_fields = ('creado_por',)
 
     class Media:
@@ -195,12 +226,52 @@ class EventoAdmin(BaseNexusAdmin):
             'js/modulos/boton_eliminar.js',
             'js/modulos/filtros_toggle.js',
             'js/modulos/reloj.js',
+            'js/modulos/evento_proveedores.js',             # Punto 2 — filtro dinámico
         )
 
     # ── Empresa en columna ──────────────────────────────────────────
     def get_empresa(self, obj):
         return obj.idsede.idempresa.nombre if obj.idsede and obj.idsede.idempresa else '-'
     get_empresa.short_description = 'Empresa'
+
+    # ── PUNTO 2: Filtrar idproveedor según la sede al EDITAR ────────
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """
+        Al cargar el form:
+        - Si estamos editando un Evento, idsede tiene un valor y filtramos
+          idproveedor a los 3 canales de esa sede.
+        - Si es un Evento nuevo, mostramos todos los proveedores; el JS
+          evento_proveedores.js se encarga de filtrarlos dinámicamente
+          al elegir sede.
+        """
+        if db_field.name == 'idproveedor':
+            sede_id = None
+            if request.resolver_match and 'object_id' in request.resolver_match.kwargs:
+                try:
+                    evento_id = request.resolver_match.kwargs['object_id']
+                    ev = Evento.objects.select_related(
+                        'idsede__canal_primario',
+                        'idsede__canal_secundario',
+                        'idsede__canal_mpls'
+                    ).get(pk=evento_id)
+                    sede_id = ev.idsede_id
+                except Evento.DoesNotExist:
+                    pass
+
+            if sede_id:
+                try:
+                    sede = Sede.objects.select_related(
+                        'canal_primario', 'canal_secundario', 'canal_mpls'
+                    ).get(pk=sede_id)
+                    ids = [
+                        c.pk for c in (sede.canal_primario, sede.canal_secundario, sede.canal_mpls)
+                        if c is not None
+                    ]
+                    kwargs['queryset'] = Proveedor.objects.filter(pk__in=ids)
+                except Sede.DoesNotExist:
+                    pass
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     # ── PUNTO 5: Solo ver sus propios eventos (no admins) ──────────
     def get_queryset(self, request):
@@ -227,7 +298,7 @@ class EventoAdmin(BaseNexusAdmin):
     # ── PUNTO 5 + 6: Auto-asignar creado_por al guardar ────────────
     def save_model(self, request, obj, form, change):
         if not change:
-            obj.creado_por = request.user   # Solo en creación
+            obj.creado_por = request.user
         super().save_model(request, obj, form, change)
         from .models import LogAccion
         x_forwarded = request.META.get('HTTP_X_FORWARDED_FOR')

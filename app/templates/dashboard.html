@@ -8,16 +8,9 @@
     <title>Dashboard de Disponibilidad — Grupo Carval</title>
 
     <link rel="icon" type="image/png" href="{% static 'images/favicon_proyecto.png' %}">
-
-    {# ────────────────────────────────────────────────────────────────
-       FIX #2 — Bootstrap CSS servido localmente (antes era CDN).
-       Esto evita romperse si AWS o el firewall corporativo bloquean
-       cdn.jsdelivr.net o cdnjs.cloudflare.com.
-       ──────────────────────────────────────────────────────────────── #}
     <link href="{% static 'css/vendor/bootstrap.min.css' %}" rel="stylesheet">
 
     <style>
-        /* ── Paleta ─────────────────────────────────────────────── */
         :root {
             --color-primary:      #10b981;
             --color-primary-dark: #065f46;
@@ -31,7 +24,6 @@
             color: #1e293b;
         }
 
-        /* ── Header ─────────────────────────────────────────────── */
         .dash-header {
             background: linear-gradient(90deg, #e5e7eb 0%, #10b981 100%);
             padding: 12px 24px;
@@ -40,7 +32,6 @@
             justify-content: space-between;
             margin-bottom: 20px;
         }
-
         .dash-header .logo-area img { height: 44px; }
 
         .btn-volver {
@@ -69,14 +60,9 @@
         }
         .btn-graficas:hover { background: var(--color-primary-dark); color: #fff; }
 
-        /* ── Tabs ────────────────────────────────────────────────── */
         .nav-pills .nav-link { color: #334155; font-weight: 500; font-size: 0.85rem; }
-        .nav-pills .nav-link.active {
-            background: var(--color-accent);
-            color: #fff;
-        }
+        .nav-pills .nav-link.active { background: var(--color-accent); color: #fff; }
 
-        /* ── Tablas ──────────────────────────────────────────────── */
         .table-excel { font-size: 0.83rem; border: 1px solid #dee2e6; background: #fff; }
         .table-excel th { text-align: center; vertical-align: middle; border: 1px solid #dee2e6; }
         .table-responsive { max-height: 75vh; overflow-y: auto; }
@@ -86,7 +72,6 @@
         .header-m     { background-color: #f3e5f5 !important; }
         .header-total { background-color: #fff3e0 !important; }
 
-        /* ── Filtro bar ──────────────────────────────────────────── */
         .filtro-bar {
             background: #fff;
             border: 1px solid #e2e8f0;
@@ -100,7 +85,6 @@
         }
         .filtro-bar label { font-weight: 600; font-size: 0.84rem; color: var(--color-accent); margin: 0; }
 
-        /* ── Botón exportar ──────────────────────────────────────── */
         .btn-exportar {
             background: #1d6f42;
             color: #fff;
@@ -114,7 +98,6 @@
         }
         .btn-exportar:hover { background: #155232; }
 
-        /* ── Acordeón lateral ────────────────────────────────────── */
         .accordion-button:not(.collapsed) {
             background-color: #d1fae5;
             color: var(--color-primary-dark);
@@ -125,15 +108,21 @@
             border-color: var(--color-accent);
         }
 
-        /* ── Graficas modal ──────────────────────────────────────── */
         .chart-container { position: relative; height: 320px; }
+
+        .alerta-libreria {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 10px 0;
+            font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- HEADER                                                      -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="dash-header">
         <div class="logo-area">
             <img src="{% static 'images/GrupoCarval.png' %}" alt="Grupo Carval">
@@ -153,12 +142,10 @@
         </div>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- CONTENIDO PRINCIPAL                                         -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="container-fluid px-4">
 
-        <!-- TABS -->
+        <div id="alertaLibrerias"></div>
+
         <ul class="nav nav-pills mb-3 bg-white p-2 rounded shadow-sm" id="pills-tab" role="tablist">
             <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-sedes"      type="button">Disponibilidad Sedes</button></li>
             <li class="nav-item"><button class="nav-link"        data-bs-toggle="pill" data-bs-target="#tab-canales"    type="button">Global Proveedores</button></li>
@@ -170,16 +157,12 @@
 
         <div class="tab-content" id="pills-tabContent">
 
-            <!-- ══════════════════════════════════════════════════ -->
-            <!-- TAB 1: DISPONIBILIDAD SEDES                        -->
-            <!-- ══════════════════════════════════════════════════ -->
             <div class="tab-pane fade show active" id="tab-sedes" role="tabpanel">
                 <div class="filtro-bar">
-                    <label>Mes:</label>
                     <form method="GET" class="d-flex gap-2 align-items-center m-0">
-                        {# FIX #3 — input hidden conserva el tab actual al filtrar #}
                         <input type="hidden" name="tab" value="tab-sedes">
-                        <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="mes-sedes">Mes:</label>
+                        <select id="mes-sedes" name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
                             <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
                             <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
@@ -193,8 +176,8 @@
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label>Año:</label>
-                        <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="anio-sedes">Año:</label>
+                        <select id="anio-sedes" name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
@@ -237,16 +220,12 @@
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════ -->
-            <!-- TAB 2: GLOBAL PROVEEDORES                          -->
-            <!-- ══════════════════════════════════════════════════ -->
             <div class="tab-pane fade" id="tab-canales" role="tabpanel">
                 <div class="filtro-bar">
                     <form method="GET" class="d-flex gap-2 align-items-center m-0">
-                        {# FIX #3 — input hidden conserva el tab actual al filtrar #}
                         <input type="hidden" name="tab" value="tab-canales">
-                        <label>Mes:</label>
-                        <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="mes-canales">Mes:</label>
+                        <select id="mes-canales" name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
                             <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
                             <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
@@ -260,8 +239,8 @@
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label>Año:</label>
-                        <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="anio-canales">Año:</label>
+                        <select id="anio-canales" name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
@@ -292,16 +271,12 @@
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════ -->
-            <!-- TAB 3: MATRIZ HISTÓRICA                            -->
-            <!-- ══════════════════════════════════════════════════ -->
             <div class="tab-pane fade" id="tab-matriz" role="tabpanel">
                 <div class="filtro-bar">
                     <form method="GET" class="d-flex gap-2 align-items-center m-0">
-                        {# FIX #3 — input hidden conserva el tab actual al filtrar #}
                         <input type="hidden" name="tab" value="tab-matriz">
-                        <label>Año a evaluar:</label>
-                        <select name="anio_matriz" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="anio-matriz">Año a evaluar:</label>
+                        <select id="anio-matriz" name="anio_matriz" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_matriz == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_matriz == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_matriz == 2026 %}selected{% endif %}>2026</option>
@@ -333,16 +308,12 @@
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════ -->
-            <!-- TAB 4: RENDIMIENTO MPLS                            -->
-            <!-- ══════════════════════════════════════════════════ -->
             <div class="tab-pane fade" id="tab-mpls" role="tabpanel">
                 <div class="filtro-bar">
                     <form method="GET" class="d-flex gap-2 align-items-center m-0">
-                        {# FIX #3 — input hidden conserva el tab actual al filtrar #}
                         <input type="hidden" name="tab" value="tab-mpls">
-                        <label>Mes:</label>
-                        <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="mes-mpls">Mes:</label>
+                        <select id="mes-mpls" name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
                             <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
                             <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
@@ -356,8 +327,8 @@
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label>Año:</label>
-                        <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="anio-mpls">Año:</label>
+                        <select id="anio-mpls" name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
@@ -388,16 +359,12 @@
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════ -->
-            <!-- TAB 5: GLOBAL PROVEEDORES MPLS                     -->
-            <!-- ══════════════════════════════════════════════════ -->
             <div class="tab-pane fade" id="tab-gmpls" role="tabpanel">
                 <div class="filtro-bar">
                     <form method="GET" class="d-flex gap-2 align-items-center m-0">
-                        {# FIX #3 — input hidden conserva el tab actual al filtrar #}
                         <input type="hidden" name="tab" value="tab-gmpls">
-                        <label>Mes:</label>
-                        <select name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="mes-gmpls">Mes:</label>
+                        <select id="mes-gmpls" name="mes_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="1"  {% if mes_gen == 1  %}selected{% endif %}>Enero</option>
                             <option value="2"  {% if mes_gen == 2  %}selected{% endif %}>Febrero</option>
                             <option value="3"  {% if mes_gen == 3  %}selected{% endif %}>Marzo</option>
@@ -411,8 +378,8 @@
                             <option value="11" {% if mes_gen == 11 %}selected{% endif %}>Noviembre</option>
                             <option value="12" {% if mes_gen == 12 %}selected{% endif %}>Diciembre</option>
                         </select>
-                        <label>Año:</label>
-                        <select name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
+                        <label for="anio-gmpls">Año:</label>
+                        <select id="anio-gmpls" name="anio_gen" class="form-select form-select-sm w-auto" onchange="this.form.submit()">
                             <option value="2024" {% if anio_gen == 2024 %}selected{% endif %}>2024</option>
                             <option value="2025" {% if anio_gen == 2025 %}selected{% endif %}>2025</option>
                             <option value="2026" {% if anio_gen == 2026 %}selected{% endif %}>2026</option>
@@ -443,9 +410,6 @@
                 </div>
             </div>
 
-            <!-- ══════════════════════════════════════════════════ -->
-            <!-- TAB 6: HISTORIAL POR SEDE                          -->
-            <!-- ══════════════════════════════════════════════════ -->
             <div class="tab-pane fade" id="tab-historial" role="tabpanel">
                 <div class="d-flex gap-2 mb-3">
                     <button id="btnToggleFiltro" class="btn btn-sm fw-bold" style="background:var(--color-accent);color:#fff;">
@@ -460,15 +424,14 @@
                             <div class="card-header fw-bold text-white" style="background:var(--color-accent);">Filtros de Búsqueda</div>
                             <div class="card-body p-3">
                                 <form method="GET" id="form-filtro-sede">
-                                    {# FIX #3 — input hidden conserva el tab actual al filtrar #}
                                     <input type="hidden" name="tab" value="tab-historial">
-                                    <label class="fw-bold small text-secondary mb-1">Seleccionar Año:</label>
-                                    <select name="anio_hist" class="form-select form-select-sm mb-3" onchange="this.form.submit()">
+                                    <label for="anio-hist" class="fw-bold small text-secondary mb-1">Seleccionar Año:</label>
+                                    <select id="anio-hist" name="anio_hist" class="form-select form-select-sm mb-3" onchange="this.form.submit()">
                                         <option value="2024" {% if anio_hist == 2024 %}selected{% endif %}>2024</option>
                                         <option value="2025" {% if anio_hist == 2025 %}selected{% endif %}>2025</option>
                                         <option value="2026" {% if anio_hist == 2026 %}selected{% endif %}>2026</option>
                                     </select>
-                                    <label class="fw-bold small text-secondary mb-2">Seleccionar Sede:</label>
+                                    <span class="fw-bold small text-secondary mb-2 d-block">Seleccionar Sede:</span>
                                     <div class="accordion accordion-flush border rounded" id="accordionSedes">
                                         {% for grupo_empresa, lista_sedes in sedes_agrupadas.items %}
                                         <div class="accordion-item">
@@ -536,12 +499,9 @@
                 </div>
             </div>
 
-        </div><!-- /tab-content -->
-    </div><!-- /container -->
+        </div>
+    </div>
 
-    <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- MODAL GRÁFICAS                                              -->
-    <!-- ═══════════════════════════════════════════════════════════ -->
     <div class="modal fade" id="modalGraficas" tabindex="-1" aria-labelledby="lblModalGraficas" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
@@ -550,6 +510,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
+                    <div id="alertaGraficas"></div>
                     <ul class="nav nav-tabs mb-3" id="tabsGraficas" role="tablist">
                         <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#g-sedes"   type="button">Sedes</button></li>
                         <li class="nav-item"><button class="nav-link"        data-bs-toggle="tab" data-bs-target="#g-canales" type="button">Proveedores</button></li>
@@ -571,177 +532,196 @@
         </div>
     </div>
 
-    {# ════════════════════════════════════════════════════════════════
-       SCRIPTS — FIX #2: Librerías servidas localmente, no por CDN.
-       Tienes que descargar los 3 archivos en static/js/vendor/
-       (ver instrucciones en README o en el chat).
-       ════════════════════════════════════════════════════════════════ #}
     <script src="{% static 'js/vendor/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'js/vendor/chart.umd.min.js' %}"></script>
+    <script src="{% static 'js/vendor/chart.min.js' %}"></script>
     <script src="{% static 'js/vendor/xlsx.full.min.js' %}"></script>
 
     <script>
-    // ══════════════════════════════════════════════════════════════
-    // INICIALIZACIÓN
-    // ══════════════════════════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', function () {
-        // ── FIX #3 — Persistencia del tab al filtrar ──────────────
-        // Prioridad de elección de tab:
-        //   1) Si la URL trae ?tab=xxx → ese (envío por form GET)
-        //   2) Si no, último tab guardado en localStorage
-        //   3) Si tampoco, parámetros viejos de historial (sede_hist)
-        //   4) Default: tab-sedes
-        const urlParams = new URLSearchParams(window.location.search);
-        let tabTarget = null;
+
+        var faltantes = [];
+        if (typeof bootstrap === 'undefined') faltantes.push('Bootstrap (bootstrap.bundle.min.js)');
+        if (typeof Chart     === 'undefined') faltantes.push('Chart.js (chart.min.js)');
+        if (typeof XLSX      === 'undefined') faltantes.push('SheetJS (xlsx.full.min.js)');
+        if (faltantes.length > 0) {
+            var msg = '<div class="alerta-libreria"><strong>⚠ Librerías faltantes:</strong> '
+                    + faltantes.join(', ')
+                    + '. Verifica que existan en <code>static/js/vendor/</code> '
+                    + 'y vuelve a correr <code>python manage.py collectstatic</code>.</div>';
+            document.getElementById('alertaLibrerias').innerHTML = msg;
+            console.error('[dashboard] Librerías faltantes:', faltantes);
+            return;
+        }
+
+        var urlParams = new URLSearchParams(window.location.search);
+        var tabTarget = null;
 
         if (urlParams.has('tab')) {
             tabTarget = '#' + urlParams.get('tab');
         } else if (urlParams.has('sede_hist') || urlParams.has('anio_hist')) {
             tabTarget = '#tab-historial';
         } else {
-            const stored = localStorage.getItem('lastTab');
-            if (stored) tabTarget = stored.startsWith('#') ? stored : '#' + stored;
+            var stored = localStorage.getItem('lastTab');
+            if (stored) tabTarget = stored.charAt(0) === '#' ? stored : '#' + stored;
         }
 
         if (tabTarget) {
             document.querySelectorAll('.nav-link, .tab-pane')
-                .forEach(el => el.classList.remove('active', 'show'));
-            const btn = document.querySelector(`button[data-bs-target="${tabTarget}"]`);
-            if (btn) new bootstrap.Tab(btn).show();
+                .forEach(function (el) { el.classList.remove('active', 'show'); });
+            var btnTab = document.querySelector('button[data-bs-target="' + tabTarget + '"]');
+            if (btnTab) new bootstrap.Tab(btnTab).show();
         }
 
-        // Guardar tab activo cuando el usuario cambia manualmente
-        document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(t => {
-            t.addEventListener('shown.bs.tab', e => {
+        document.querySelectorAll('button[data-bs-toggle="pill"]').forEach(function (t) {
+            t.addEventListener('shown.bs.tab', function (e) {
                 localStorage.setItem('lastTab', e.target.dataset.bsTarget);
             });
         });
 
-        // ── Abrir acordeón de la sede activa ──────────────────────
-        const activeSede = document.querySelector('.list-group-item.active');
+        var activeSede = document.querySelector('.list-group-item.active');
         if (activeSede) {
-            const panel = activeSede.closest('.accordion-collapse');
+            var panel = activeSede.closest('.accordion-collapse');
             if (panel) new bootstrap.Collapse(panel, { toggle: false }).show();
         }
 
-        // ── Toggle panel lateral del tab Historial ────────────────
-        document.getElementById('btnToggleFiltro')?.addEventListener('click', function () {
-            const izq = document.getElementById('panelFiltros');
-            const der = document.getElementById('panelResultados');
-            if (izq.classList.contains('d-none')) {
-                izq.classList.remove('d-none');
-                der.className = 'col-md-9';
-                this.innerHTML = '◀ Ocultar Filtros';
-            } else {
-                izq.classList.add('d-none');
-                der.className = 'col-md-12';
-                this.innerHTML = '▶ Mostrar Filtros';
-            }
-        });
+        var btnTog = document.getElementById('btnToggleFiltro');
+        if (btnTog) {
+            btnTog.addEventListener('click', function () {
+                var izq = document.getElementById('panelFiltros');
+                var der = document.getElementById('panelResultados');
+                if (izq.classList.contains('d-none')) {
+                    izq.classList.remove('d-none');
+                    der.className = 'col-md-9';
+                    this.innerHTML = '◀ Ocultar Filtros';
+                } else {
+                    izq.classList.add('d-none');
+                    der.className = 'col-md-12';
+                    this.innerHTML = '▶ Mostrar Filtros';
+                }
+            });
+        }
 
-        // ── Inicializar gráficas cuando se abra el modal ──────────
         document.getElementById('modalGraficas')
             .addEventListener('shown.bs.modal', inicializarGraficas);
     });
 
-    // ══════════════════════════════════════════════════════════════
-    // EXPORTAR A EXCEL (SheetJS)
-    // ══════════════════════════════════════════════════════════════
     function exportarTabla(tablaId, nombreArchivo) {
-        const tabla = document.getElementById(tablaId);
-        if (!tabla) {
-            console.warn('[exportar] Tabla no encontrada:', tablaId);
+        if (typeof XLSX === 'undefined') {
+            alert('SheetJS no está cargado. Verifica que xlsx.full.min.js esté en static/js/vendor/');
             return;
         }
-        const wb = XLSX.utils.table_to_book(tabla, { sheet: nombreArchivo });
+        var tabla = document.getElementById(tablaId);
+        if (!tabla) { console.warn('[exportar] Tabla no encontrada:', tablaId); return; }
+        var wb = XLSX.utils.table_to_book(tabla, { sheet: nombreArchivo });
         XLSX.writeFile(wb, nombreArchivo + '.xlsx');
     }
 
-    // ══════════════════════════════════════════════════════════════
-    // GRÁFICAS (Chart.js)
-    // ══════════════════════════════════════════════════════════════
-    let graficasInicializadas = false;
+    var graficasInicializadas = false;
 
     function inicializarGraficas() {
         if (graficasInicializadas) return;
+        if (typeof Chart === 'undefined') {
+            document.getElementById('alertaGraficas').innerHTML =
+                '<div class="alerta-libreria">Chart.js no está cargado. Verifica static/js/vendor/chart.min.js</div>';
+            return;
+        }
         graficasInicializadas = true;
 
-        const META = {{ meta_global }};
+        var META = {{ meta_global }};
 
-        // Datos desde Django
-        const dataSedes = {
+        var dataSedes = {
             labels: [{% for f in reporte %}"{{ f.sede }}"{% if not forloop.last %},{% endif %}{% endfor %}],
             primario:   [{% for f in reporte %}{{ f.disp_p }}{% if not forloop.last %},{% endif %}{% endfor %}],
-            secundario: [{% for f in reporte %}{{ f.disp_s }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            secundario: [{% for f in reporte %}{{ f.disp_s }}{% if not forloop.last %},{% endif %}{% endfor %}]
+        };
+        var dataCanales = {
+            labels:  [{% for c in canales %}"{{ c.nombre }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+            valores: [{% for c in canales %}{{ c.disp }}{% if not forloop.last %},{% endif %}{% endfor %}]
+        };
+        var dataMpls = {
+            labels:  [{% for m in reporte_mpls %}"{{ m.sede }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+            valores: [{% for m in reporte_mpls %}{{ m.disp }}{% if not forloop.last %},{% endif %}{% endfor %}]
         };
 
-        const dataCanales = {
-            labels: [{% for c in canales %}"{{ c.nombre }}"{% if not forloop.last %},{% endif %}{% endfor %}],
-            valores: [{% for c in canales %}{{ c.disp }}{% if not forloop.last %},{% endif %}{% endfor %}],
-        };
+        function lineaMeta(len) {
+            return {
+                label: 'Meta SLA',
+                data: Array(len).fill(META),
+                borderColor: '#ef4444',
+                borderDash: [6,3],
+                borderWidth: 2,
+                pointRadius: 0,
+                type: 'line',
+                order: 0,
+                fill: false
+            };
+        }
 
-        const dataMpls = {
-            labels: [{% for m in reporte_mpls %}"{{ m.sede }}"{% if not forloop.last %},{% endif %}{% endfor %}],
-            valores: [{% for m in reporte_mpls %}{{ m.disp }}{% if not forloop.last %},{% endif %}{% endfor %}],
-        };
+        /* Chart.js v3 syntax — sin callbacks que usen `eval`/`new Function` */
+        function opcionesBase(titulo) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title:   { display: true, text: titulo, font: { size: 14 } },
+                    legend:  { position: 'top' }
+                    /* tooltip callback con función nativa, no string */
+                },
+                scales: {
+                    y: {
+                        min: 90,
+                        max: 100,
+                        ticks: {
+                            /* funcion arrow nativa - no es eval */
+                            callback: function (v) { return v + '%'; }
+                        }
+                    }
+                }
+            };
+        }
 
-        const lineaMeta = (len) => ({
-            label: 'Meta SLA', data: Array(len).fill(META),
-            borderColor: '#ef4444', borderDash: [6,3], borderWidth: 2,
-            pointRadius: 0, type: 'line', order: 0
-        });
+        if (dataSedes.labels.length > 0) {
+            new Chart(document.getElementById('chartSedes').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: dataSedes.labels,
+                    datasets: [
+                        { label: 'Canal Primario %',   data: dataSedes.primario,   backgroundColor: 'rgba(59,130,246,0.7)' },
+                        { label: 'Canal Secundario %', data: dataSedes.secundario, backgroundColor: 'rgba(16,185,129,0.7)' },
+                        lineaMeta(dataSedes.labels.length)
+                    ]
+                },
+                options: opcionesBase('Disponibilidad por Sede (%)')
+            });
+        }
 
-        new Chart(document.getElementById('chartSedes'), {
-            type: 'bar',
-            data: {
-                labels: dataSedes.labels,
-                datasets: [
-                    { label: 'Canal Primario %',   data: dataSedes.primario,   backgroundColor: 'rgba(59,130,246,0.7)' },
-                    { label: 'Canal Secundario %', data: dataSedes.secundario, backgroundColor: 'rgba(16,185,129,0.7)' },
-                    lineaMeta(dataSedes.labels.length)
-                ]
-            },
-            options: opcionesBase('Disponibilidad por Sede (%)')
-        });
+        if (dataCanales.labels.length > 0) {
+            new Chart(document.getElementById('chartCanales').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: dataCanales.labels,
+                    datasets: [
+                        { label: 'Disponibilidad %', data: dataCanales.valores, backgroundColor: 'rgba(47,93,109,0.75)' },
+                        lineaMeta(dataCanales.labels.length)
+                    ]
+                },
+                options: opcionesBase('Disponibilidad Global por Proveedor (%)')
+            });
+        }
 
-        new Chart(document.getElementById('chartCanales'), {
-            type: 'bar',
-            data: {
-                labels: dataCanales.labels,
-                datasets: [
-                    { label: 'Disponibilidad %', data: dataCanales.valores, backgroundColor: 'rgba(47,93,109,0.75)' },
-                    lineaMeta(dataCanales.labels.length)
-                ]
-            },
-            options: opcionesBase('Disponibilidad Global por Proveedor (%)')
-        });
-
-        new Chart(document.getElementById('chartMpls'), {
-            type: 'bar',
-            data: {
-                labels: dataMpls.labels,
-                datasets: [
-                    { label: 'Disponibilidad MPLS %', data: dataMpls.valores, backgroundColor: 'rgba(168,85,247,0.7)' },
-                    lineaMeta(dataMpls.labels.length)
-                ]
-            },
-            options: opcionesBase('Rendimiento MPLS por Sede (%)')
-        });
-    }
-
-    function opcionesBase(titulo) {
-        return {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title:   { display: true, text: titulo, font: { size: 14 } },
-                legend:  { position: 'top' },
-                tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y}%` } }
-            },
-            scales: {
-                y: { min: 90, max: 100, ticks: { callback: v => v + '%' } }
-            }
-        };
+        if (dataMpls.labels.length > 0) {
+            new Chart(document.getElementById('chartMpls').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: dataMpls.labels,
+                    datasets: [
+                        { label: 'Disponibilidad MPLS %', data: dataMpls.valores, backgroundColor: 'rgba(168,85,247,0.7)' },
+                        lineaMeta(dataMpls.labels.length)
+                    ]
+                },
+                options: opcionesBase('Rendimiento MPLS por Sede (%)')
+            });
+        }
     }
     </script>
 
