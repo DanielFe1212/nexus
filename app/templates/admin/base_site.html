@@ -1,6 +1,12 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
+{# Título dinámico de la pestaña del navegador (Punto 4) #}
+{# Django expone `title` en el contexto del admin, que ya contiene cosas como
+   "Eventos", "Añadir Evento", "Inicio del sitio", etc. Lo combinamos con el
+   branding del proyecto. #}
+{% block title %}{% if title %}{{ title }} | {% endif %}Nexus Carval{% endblock %}
+
 {% block extrastyle %}
 {{ block.super }}
 <meta name="color-scheme" content="light">

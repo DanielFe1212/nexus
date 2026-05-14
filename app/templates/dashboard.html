@@ -422,7 +422,7 @@
                     <button type="button" class="btn-exportar"
                             data-export-tabla="tabla-historial"
                             data-export-nombre="Historial_{{ sede_obj.nombre|slugify }}">
-                        Exportar Excel
+                        ⬇ Exportar Excel
                     </button>
                     {% else %}
                     <button type="button" class="btn-exportar" disabled title="Primero selecciona una sede" style="opacity:0.5;cursor:not-allowed;">⬇ Exportar Excel</button>
@@ -517,7 +517,7 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header" style="background:var(--color-accent);">
-                    <h5 class="modal-title text-white fw-bold" id="lblModalGraficas">Gráficas de Disponibilidad</h5>
+                    <h5 class="modal-title text-white fw-bold" id="lblModalGraficas">📊 Gráficas de Disponibilidad</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -542,6 +542,11 @@
             </div>
         </div>
     </div>
+
+    {# Datos para las gráficas pasados como JSON limpio (sin problemas de
+       coma decimal por localización, comillas, ni eval). El navegador los
+       parsea con JSON.parse, que es CSP-safe. #}
+    {{ chart_data|json_script:"chart-data" }}
 
     <script src="{% static 'js/vendor/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/vendor/chart.min.js' %}"></script>
@@ -671,9 +676,22 @@
                 '<div class="alerta-libreria">Chart.js no está cargado. Verifica static/js/vendor/chart.min.js</div>';
             return;
         }
+
+        // Verificación defensiva: chart-data puede no existir si el cache
+        // tiene una versión vieja del contexto sin chart_data. En ese caso
+        // pedimos al usuario que pulse Actualizar para regenerar.
+        var chartDataEl = document.getElementById('chart-data');
+        if (!chartDataEl) {
+            document.getElementById('alertaGraficas').innerHTML =
+                '<div class="alerta-libreria">No se encontraron datos para las gráficas. ' +
+                'Pulsa el botón <strong>🔄 Actualizar</strong> arriba para regenerarlos.</div>';
+            console.warn('[dashboard] #chart-data no existe en el DOM');
+            return;
+        }
+
         graficasInicializadas = true;
 
-        var chartData = JSON.parse(document.getElementById('chart-data').textContent);
+        var chartData = JSON.parse(chartDataEl.textContent);
         var META = chartData.meta;
 
         var dataSedes = {

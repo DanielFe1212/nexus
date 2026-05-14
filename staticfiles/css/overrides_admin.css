@@ -258,51 +258,52 @@ p.datetime span.timezonewarning {
 /* ==================================================================
    PUNTO 7 — Toggle de filtros + expansión de tabla al ocultar panel
    ==================================================================
-   En el admin de Django, el changelist tiene esta estructura:
-     #changelist {display: flex}
-       ├── #changelist-form  (tabla + paginador)
-       └── #changelist-filter (panel lateral de filtros)
+   En Django 6 el changelist tiene esta estructura:
+     <div id="changelist" class="module filtered">
+       <div class="changelist-form-container">    ← display: flex (Django lo pone)
+         <search id="changelist-filter"> ... </search>
+         <div>
+           <form id="changelist-form"> ... </form>
+         </div>
+       </div>
+     </div>
 
-   filtros_toggle.js agrega/quita la clase .filtro-oculto al panel
-   de filtros. Aquí:
-     - Cuando .filtro-oculto está presente → ocultamos el panel
-       y permitimos que la tabla ocupe el 100% del ancho.
-     - Cuando no está → comportamiento normal.
+   El CSS NATIVO de Django (changelists.css) tiene esta regla:
+       .changelist-form-container:has(#changelist-filter) > div {
+           max-width: calc(100% - 270px);
+       }
+   Esa regla limita el ancho de la tabla a (100% - 270px) SIEMPRE que
+   exista el panel #changelist-filter, sin verificar si está oculto.
 
-   Esto da el efecto que pediste: tabla expande cuando ocultas
-   filtros, tabla encoge cuando los muestras.
+   Por eso ocultar el panel con display:none no era suficiente:
+   filtros_toggle.js también añade .filtros-ocultos al <body>, lo que
+   permite que el CSS anule el max-width nativo.
    ================================================================== */
 
-/* Cuando los filtros están ocultos */
+/* 1) Ocultar el panel de filtros cuando tiene la clase */
 #changelist-filter.filtro-oculto {
     display: none !important;
 }
 
-/* La tabla SIEMPRE puede crecer; cuando el panel filtro está oculto,
-   no hay competidor flex y la tabla ocupa todo el ancho automáticamente */
-#changelist-form,
-#changelist-form .results {
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
+/* 2) Expandir la tabla al 100% del contenedor cuando filtros ocultos */
+body.filtros-ocultos #changelist .changelist-form-container > div {
+    max-width: 100% !important;
     width: 100% !important;
-    transition: width 0.2s ease;
 }
 
-/* Aseguramos que el contenedor padre sea flex y que se vea bien
-   con o sin panel lateral */
-#changelist {
-    display: flex !important;
-    gap: 14px !important;
-    align-items: flex-start !important;
+body.filtros-ocultos #changelist-form,
+body.filtros-ocultos #result_list {
+    width: 100% !important;
 }
 
-/* Panel de filtros con ancho fijo cuando visible */
-#changelist-filter {
-    flex: 0 0 240px !important;
-    transition: all 0.2s ease;
+/* Transición suave al expandir/contraer */
+#changelist .changelist-form-container > div,
+#changelist-form,
+#result_list {
+    transition: max-width 0.25s ease, width 0.25s ease;
 }
 
-/* Estilo del botón toggle (que filtros_toggle.js inserta) */
+/* 3) Estilo del botón toggle (que filtros_toggle.js inserta) */
 #btn-toggle-filtros {
     background: var(--color-accent) !important;
     color: #ffffff !important;
