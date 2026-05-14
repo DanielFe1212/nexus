@@ -152,39 +152,174 @@ th.column-nombre a[href*="enlacedashboard"] {
 }
 
 /* ==================================================================
-   PUNTO 1 — Widgets nativos de fecha y hora (SplitDateTimeWidget)
+   PUNTO 1 — Estilos para Flatpickr (calendario y reloj custom)
    ==================================================================
-   El form de Evento ahora usa <input type="date"> y <input type="time">
-   nativos del navegador → calendario y reloj propios del SO/browser.
+   El form de Evento usa los widgets clásicos del admin de Django
+   (AdminSplitDateTime), que ponen las clases .vDateField y .vTimeField
+   en los inputs. reloj.js los engancha a Flatpickr para mostrar un
+   calendario y reloj custom en español.
 
-   Aquí solo damos estilo y resolvemos el spacing.
+   Aquí estilizamos los inputs y el popup de Flatpickr con la paleta
+   del proyecto Carval (verde primary).
    ================================================================== */
 
-/* Contenedor de los 2 inputs (date + time) del SplitDateTimeWidget */
-.field-fecha_inicio .splitdatetime,
-.field-fecha_fin    .splitdatetime,
-.form-row.field-fecha_inicio,
-.form-row.field-fecha_fin {
-    display: block !important;
-}
-
-/* El widget renderiza los 2 inputs separados — los unimos en línea */
-input.input-fecha-nativo,
-input.input-hora-nativo {
-    display: inline-block !important;
-    vertical-align: middle !important;
-    border: 1px solid var(--color-border) !important;
-    border-radius: var(--radius-sm) !important;
+/* Inputs de fecha y hora del admin — tamaño compacto */
+input.vDateField {
+    width: 130px !important;
     padding: 5px 8px !important;
-    font-size: 0.87rem !important;
     margin: 0 4px 0 0 !important;
     background: #ffffff !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 0.87rem !important;
 }
 
-input.input-fecha-nativo { width: 145px !important; }
-input.input-hora-nativo  { width: 110px !important; }
+input.vTimeField {
+    width: 90px !important;
+    padding: 5px 8px !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-sm) !important;
+    font-size: 0.87rem !important;
+}
 
-/* Quitar el spacing residual entre los inputs split */
-.form-row > div > input + input {
-    margin-left: 4px !important;
+/* Texto "Fecha:" / "Hora:" — inline y compacto */
+p.datetime > span {
+    font-size: 0.82rem !important;
+    color: var(--color-text-muted) !important;
+    white-space: nowrap !important;
+    margin: 0 4px 0 8px !important;
+}
+
+/* Ocultar los atajos "Hoy/Ahora" nativos de Django */
+.datetimeshortcuts,
+p.datetime span.timezonewarning {
+    display: none !important;
+}
+
+/* ── FLATPICKR — Paleta Carval ───────────────────────────────────── */
+
+/* Día seleccionado y hover en el calendario */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange {
+    background: var(--color-primary) !important;
+    border-color: var(--color-primary) !important;
+    color: #ffffff !important;
+}
+
+.flatpickr-day:hover {
+    background: var(--color-primary-light) !important;
+    color: var(--color-primary-dark) !important;
+}
+
+.flatpickr-day.today {
+    border-color: var(--color-primary) !important;
+    color: var(--color-primary-dark) !important;
+    font-weight: 700;
+}
+
+.flatpickr-day.today.selected {
+    color: #ffffff !important;
+}
+
+/* Encabezado del calendario (mes/año) */
+.flatpickr-months .flatpickr-month,
+.flatpickr-current-month,
+.flatpickr-weekdays {
+    color: var(--color-primary-dark) !important;
+}
+
+.flatpickr-monthDropdown-months,
+.numInputWrapper input {
+    color: var(--color-primary-dark) !important;
+    font-weight: 600;
+}
+
+/* Reloj (cuando es enableTime) */
+.flatpickr-time input:hover,
+.flatpickr-time .flatpickr-am-pm:hover {
+    background: var(--color-primary-light) !important;
+}
+
+.flatpickr-time input:focus {
+    border-color: var(--color-primary) !important;
+}
+
+/* Popup en general — sombra acorde con el resto del admin */
+.flatpickr-calendar {
+    box-shadow: var(--shadow-md) !important;
+    border-radius: var(--radius-md) !important;
+    border: 1px solid var(--color-border) !important;
+}
+
+/* ==================================================================
+   PUNTO 7 — Toggle de filtros + expansión de tabla al ocultar panel
+   ==================================================================
+   En el admin de Django, el changelist tiene esta estructura:
+     #changelist {display: flex}
+       ├── #changelist-form  (tabla + paginador)
+       └── #changelist-filter (panel lateral de filtros)
+
+   filtros_toggle.js agrega/quita la clase .filtro-oculto al panel
+   de filtros. Aquí:
+     - Cuando .filtro-oculto está presente → ocultamos el panel
+       y permitimos que la tabla ocupe el 100% del ancho.
+     - Cuando no está → comportamiento normal.
+
+   Esto da el efecto que pediste: tabla expande cuando ocultas
+   filtros, tabla encoge cuando los muestras.
+   ================================================================== */
+
+/* Cuando los filtros están ocultos */
+#changelist-filter.filtro-oculto {
+    display: none !important;
+}
+
+/* La tabla SIEMPRE puede crecer; cuando el panel filtro está oculto,
+   no hay competidor flex y la tabla ocupa todo el ancho automáticamente */
+#changelist-form,
+#changelist-form .results {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    transition: width 0.2s ease;
+}
+
+/* Aseguramos que el contenedor padre sea flex y que se vea bien
+   con o sin panel lateral */
+#changelist {
+    display: flex !important;
+    gap: 14px !important;
+    align-items: flex-start !important;
+}
+
+/* Panel de filtros con ancho fijo cuando visible */
+#changelist-filter {
+    flex: 0 0 240px !important;
+    transition: all 0.2s ease;
+}
+
+/* Estilo del botón toggle (que filtros_toggle.js inserta) */
+#btn-toggle-filtros {
+    background: var(--color-accent) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 6px 14px !important;
+    font-weight: 700 !important;
+    font-size: 0.82rem !important;
+    cursor: pointer;
+    margin: 8px 0 !important;
+    transition: background 0.2s ease;
+}
+
+#btn-toggle-filtros:hover {
+    background: var(--color-primary-dark) !important;
+}
+
+#btn-toggle-filtros[aria-expanded="true"] {
+    background: var(--color-primary) !important;
 }

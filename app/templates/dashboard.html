@@ -135,8 +135,11 @@
             <span class="badge bg-secondary">Min. Mes: {{ minutos_mes }}</span>
         </div>
         <div class="d-flex gap-2">
+            <button type="button" class="btn-volver" id="btnActualizar" title="Refrescar datos del dashboard">
+                Actualizar
+            </button>
             <button class="btn-graficas" data-bs-toggle="modal" data-bs-target="#modalGraficas">
-                📊 Ver Gráficas
+                Ver Gráficas
             </button>
             <a href="/admin/" class="btn-volver">← Volver al Admin</a>
         </div>
@@ -412,10 +415,18 @@
 
             <div class="tab-pane fade" id="tab-historial" role="tabpanel">
                 <div class="d-flex gap-2 mb-3">
-                    <button id="btnToggleFiltro" class="btn btn-sm fw-bold" style="background:var(--color-accent);color:#fff;">
+                    <button id="btnToggleFiltro" type="button" class="btn btn-sm fw-bold" style="background:var(--color-accent);color:#fff;">
                         ◀ Ocultar Filtros
                     </button>
-                    <button class="btn-exportar" onclick="exportarTabla('tabla-historial', 'Historial_Sede')">⬇ Exportar Excel</button>
+                    {% if sede_obj %}
+                    <button type="button" class="btn-exportar"
+                            data-export-tabla="tabla-historial"
+                            data-export-nombre="Historial_{{ sede_obj.nombre|slugify }}">
+                        Exportar Excel
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn-exportar" disabled title="Primero selecciona una sede" style="opacity:0.5;cursor:not-allowed;">⬇ Exportar Excel</button>
+                    {% endif %}
                 </div>
 
                 <div class="row">
@@ -506,7 +517,7 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header" style="background:var(--color-accent);">
-                    <h5 class="modal-title text-white fw-bold" id="lblModalGraficas">📊 Gráficas de Disponibilidad</h5>
+                    <h5 class="modal-title text-white fw-bold" id="lblModalGraficas">Gráficas de Disponibilidad</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -586,9 +597,16 @@
 
         var btnTog = document.getElementById('btnToggleFiltro');
         if (btnTog) {
-            btnTog.addEventListener('click', function () {
+            console.log('[dashboard] btnToggleFiltro encontrado, listener registrado');
+            btnTog.addEventListener('click', function (e) {
+                e.preventDefault();
+                console.log('[dashboard] Click en btnToggleFiltro');
                 var izq = document.getElementById('panelFiltros');
                 var der = document.getElementById('panelResultados');
+                if (!izq || !der) {
+                    console.warn('[dashboard] panelFiltros o panelResultados no existen');
+                    return;
+                }
                 if (izq.classList.contains('d-none')) {
                     izq.classList.remove('d-none');
                     der.className = 'col-md-9';
@@ -598,6 +616,29 @@
                     der.className = 'col-md-12';
                     this.innerHTML = '▶ Mostrar Filtros';
                 }
+            });
+        } else {
+            console.warn('[dashboard] btnToggleFiltro NO encontrado en el DOM');
+        }
+
+        // Listener para botones de exportar Excel que usan data-attributes.
+        // Más robusto que onclick inline, que se rompe cuando los valores
+        // Django (slugify, default, etc) traen comillas o caracteres especiales.
+        document.querySelectorAll('button[data-export-tabla]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var tabla   = btn.getAttribute('data-export-tabla');
+                var nombre  = btn.getAttribute('data-export-nombre') || tabla;
+                exportarTabla(tabla, nombre);
+            });
+        });
+
+        // Botón "Actualizar" — recarga con ?refresh=1 para bypassear el cache
+        var btnAct = document.getElementById('btnActualizar');
+        if (btnAct) {
+            btnAct.addEventListener('click', function () {
+                var url = new URL(window.location.href);
+                url.searchParams.set('refresh', '1');
+                window.location.href = url.toString();
             });
         }
 
@@ -611,7 +652,12 @@
             return;
         }
         var tabla = document.getElementById(tablaId);
-        if (!tabla) { console.warn('[exportar] Tabla no encontrada:', tablaId); return; }
+        if (!tabla) {
+            console.warn('[exportar] Tabla no encontrada:', tablaId);
+            alert('No se encuentra la tabla "' + tablaId + '". ' +
+                  'Si estás en el tab Historial, primero selecciona una sede.');
+            return;
+        }
         var wb = XLSX.utils.table_to_book(tabla, { sheet: nombreArchivo });
         XLSX.writeFile(wb, nombreArchivo + '.xlsx');
     }
@@ -627,20 +673,21 @@
         }
         graficasInicializadas = true;
 
-        var META = {{ meta_global }};
+        var chartData = JSON.parse(document.getElementById('chart-data').textContent);
+        var META = chartData.meta;
 
         var dataSedes = {
-            labels: [{% for f in reporte %}"{{ f.sede }}"{% if not forloop.last %},{% endif %}{% endfor %}],
-            primario:   [{% for f in reporte %}{{ f.disp_p }}{% if not forloop.last %},{% endif %}{% endfor %}],
-            secundario: [{% for f in reporte %}{{ f.disp_s }}{% if not forloop.last %},{% endif %}{% endfor %}]
+            labels:     chartData.sedes.labels,
+            primario:   chartData.sedes.primario,
+            secundario: chartData.sedes.secundario
         };
         var dataCanales = {
-            labels:  [{% for c in canales %}"{{ c.nombre }}"{% if not forloop.last %},{% endif %}{% endfor %}],
-            valores: [{% for c in canales %}{{ c.disp }}{% if not forloop.last %},{% endif %}{% endfor %}]
+            labels:  chartData.canales.labels,
+            valores: chartData.canales.valores
         };
         var dataMpls = {
-            labels:  [{% for m in reporte_mpls %}"{{ m.sede }}"{% if not forloop.last %},{% endif %}{% endfor %}],
-            valores: [{% for m in reporte_mpls %}{{ m.disp }}{% if not forloop.last %},{% endif %}{% endfor %}]
+            labels:  chartData.mpls.labels,
+            valores: chartData.mpls.valores
         };
 
         function lineaMeta(len) {

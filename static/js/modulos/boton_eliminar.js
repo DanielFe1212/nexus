@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (document.querySelector('.btn-eliminar-custom')) return;
 
         const deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '🗑️ Eliminar Seleccionados';
+        deleteBtn.innerHTML = 'Eliminar Seleccionados';
         deleteBtn.className = 'btn-eliminar-custom';
 
         deleteBtn.onclick = function(e) {

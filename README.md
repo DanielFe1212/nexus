@@ -130,7 +130,7 @@ Acceder en: `http://127.0.0.1:8000/admin/`
 
 ## Exportación a Power BI
 
-Desde cada tabla del dashboard, el botón **"⬇ Exportar Excel"** genera un `.xlsx` directamente en el navegador (SheetJS, sin servidor). Luego en Power BI Desktop:
+Desde cada tabla del dashboard, el botón **"Exportar Excel"** genera un `.xlsx` directamente en el navegador (SheetJS, sin servidor). Luego en Power BI Desktop:
 
 1. `Inicio → Obtener datos → Excel`
 2. Seleccionar el archivo exportado

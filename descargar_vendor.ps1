@@ -1,7 +1,7 @@
 # ============================================================================
-#  descargar_vendor.ps1
+#  descargar_vendor.ps1  (v2)
 # ============================================================================
-#  Descarga las 4 librerias JS/CSS que el dashboard necesita.
+#  Descarga las 6 librerias JS/CSS que el dashboard y el admin necesitan.
 #  Uso:
 #    1) Abre PowerShell en la raiz del proyecto Nexus.
 #    2) Si bloquea por politica de ejecucion:
@@ -15,10 +15,15 @@ New-Item -ItemType Directory -Path "static\css\vendor" -Force | Out-Null
 New-Item -ItemType Directory -Path "static\js\vendor"  -Force | Out-Null
 
 $descargas = @(
+    # Dashboard
     @{Url="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css";      Out="static\css\vendor\bootstrap.min.css"},
     @{Url="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"; Out="static\js\vendor\bootstrap.bundle.min.js"},
     @{Url="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js";                Out="static\js\vendor\chart.min.js"},
-    @{Url="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";          Out="static\js\vendor\xlsx.full.min.js"}
+    @{Url="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";          Out="static\js\vendor\xlsx.full.min.js"},
+    # Admin form de Evento (Flatpickr para calendario y reloj)
+    @{Url="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css";         Out="static\css\vendor\flatpickr.min.css"},
+    @{Url="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js";          Out="static\js\vendor\flatpickr.min.js"},
+    @{Url="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.min.js";            Out="static\js\vendor\flatpickr.es.min.js"}
 )
 
 Write-Host "[2/3] Descargando librerias..." -ForegroundColor Cyan
@@ -35,7 +40,7 @@ foreach ($d in $descargas) {
     }
 }
 
-# Si quedo instalada la version vieja de Chart.js v4, la eliminamos
+# Limpieza: si quedo Chart.js v4 obsoleto, lo eliminamos
 if (Test-Path "static\js\vendor\chart.umd.min.js") {
     Write-Host "[3/3] Eliminando Chart.js v4 obsoleto (chart.umd.min.js)..." -ForegroundColor Yellow
     Remove-Item "static\js\vendor\chart.umd.min.js" -Force

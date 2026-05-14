@@ -13,9 +13,11 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils import timezone
-from django.db.models import Q, Prefetch
+from django.db.models import Q, Prefetch, Max
+from django.core.cache import cache
 from datetime import datetime
 import calendar
+import hashlib
 
 from .models import Sede, Evento, ConfiguracionGlobal, Proveedor
 
@@ -84,6 +86,23 @@ def dashboard_kpi(request):
     anio_matriz  = int(request.GET.get('anio_matriz', hoy.year))
     anio_hist    = int(request.GET.get('anio_hist',  hoy.year))
     sede_id_hist = request.GET.get('sede_hist')
+    force_refresh = request.GET.get('refresh') == '1'
+
+    # ── Cache de 5 minutos (Punto 5) ─────────────────────────────────────────
+    # Clave: hash de los parámetros de filtro + timestamp del último Evento.
+    # Si alguien crea/edita un evento, el timestamp cambia y el cache se invalida
+    # automáticamente. Si el usuario pulsa "Actualizar" (?refresh=1), se bypasea.
+    ultimo_evento = Evento.objects.aggregate(m=Max('fecha_inicio'))['m']
+    cache_seed = (
+        f"{mes_gen}|{anio_gen}|{anio_matriz}|{anio_hist}|{sede_id_hist}|"
+        f"{ultimo_evento.isoformat() if ultimo_evento else 'none'}"
+    )
+    cache_key = "dashboard_kpi_" + hashlib.md5(cache_seed.encode()).hexdigest()
+
+    if not force_refresh:
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return render(request, 'dashboard.html', cached)
 
     # ── Configuración ─────────────────────────────────────────────────────────
     config      = ConfiguracionGlobal.objects.first()
@@ -278,7 +297,31 @@ def dashboard_kpi(request):
                 'disp_m': round((1 - calcular_minutos_caida_reales(evs_filtrados, p_h, u_h, 'MPLS')      / m_h) * 100, 2) if m_h else 100.0,
             })
 
-    return render(request, 'dashboard.html', {
+    # ── Datos para las gráficas (Chart.js) ─────────────────────────
+    # Los empaquetamos como dict y lo pasamos a json_script en el template.
+    # Así evitamos:
+    #   - Problemas de coma decimal por localización (es-CO).
+    #   - Errores de escape con comillas en nombres de sede/proveedor.
+    #   - Issues con CSP que bloquea eval/new Function.
+    # Es el patrón recomendado por Django para inyectar datos en JS.
+    chart_data = {
+        'meta': float(meta * 100),
+        'sedes': {
+            'labels':     [r['sede']   for r in reporte_sedes],
+            'primario':   [float(r['disp_p']) for r in reporte_sedes],
+            'secundario': [float(r['disp_s']) for r in reporte_sedes],
+        },
+        'canales': {
+            'labels':  [c['nombre']   for c in reporte_canales],
+            'valores': [float(c['disp']) for c in reporte_canales],
+        },
+        'mpls': {
+            'labels':  [m['sede']    for m in reporte_mpls],
+            'valores': [float(m['disp']) for m in reporte_mpls],
+        },
+    }
+
+    context = {
         'mes_gen':          mes_gen,
         'anio_gen':         anio_gen,
         'mes_nombre':       MESES_ESPANOL[mes_gen].upper(),
@@ -296,7 +339,13 @@ def dashboard_kpi(request):
         'historico_sede':   historico_sede,
         'reporte_mpls':     reporte_mpls,
         'canales_mpls':     canales_mpls,
-    })
+        'chart_data':       chart_data,
+    }
+
+    # Guardar en cache 5 minutos (auto-invalidación por timestamp de Evento)
+    cache.set(cache_key, context, 300)
+
+    return render(request, 'dashboard.html', context)
 
 
 # ============================================================================

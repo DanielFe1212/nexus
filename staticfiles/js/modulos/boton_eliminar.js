@@ -1,33 +1,40 @@
-(function() {
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener("DOMContentLoaded", function () {
 
+    function initDeleteButton() {
         const actionContainer = document.querySelector('.actions');
-        if (!actionContainer) return;
+
+        if (!actionContainer) {
+            setTimeout(initDeleteButton, 300);
+            return;
+        }
 
         const actionSelect = actionContainer.querySelector('select[name="action"]');
         const runButton = actionContainer.querySelector('button[name="index"]');
 
-        if (actionSelect && runButton) {
+        if (!actionSelect || !runButton) return;
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '🗑️ Eliminar Seleccionados';
-            deleteBtn.className = 'btn-eliminar-custom';
+        if (document.querySelector('.btn-eliminar-custom')) return;
 
-            deleteBtn.onclick = function(e) {
-                e.preventDefault();
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = 'Eliminar Seleccionados';
+        deleteBtn.className = 'btn-eliminar-custom';
 
-                const seleccionados = document.querySelectorAll('.action-select:checked').length;
+        deleteBtn.onclick = function(e) {
+            e.preventDefault();
 
-                if (seleccionados === 0) {
-                    alert('⚠️ Selecciona registros primero.');
-                    return;
-                }
+            const seleccionados = document.querySelectorAll('.action-select:checked').length;
 
-                actionSelect.value = 'delete_selected';
-                runButton.click();
-            };
+            if (!seleccionados) {
+                alert('⚠️ Selecciona registros primero.');
+                return;
+            }
 
-            actionContainer.prepend(deleteBtn);
-        }
-    });
-})();
+            actionSelect.value = 'delete_selected';
+            runButton.click();
+        };
+
+        actionContainer.prepend(deleteBtn);
+    }
+
+    initDeleteButton();
+});

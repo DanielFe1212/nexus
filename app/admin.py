@@ -12,7 +12,6 @@ Propósito:
 
 from django.contrib import admin
 from django.shortcuts import redirect
-from django import forms
 from rangefilter.filters import DateRangeFilterBuilder
 
 from .models import (
@@ -24,6 +23,24 @@ from .models import (
 admin.site.site_header = "Administración Grupo Carval"
 admin.site.site_title  = "Admin Carval"
 admin.site.index_title = "Panel de Control"
+
+
+# ==============================================================================
+# UTILIDAD — Detectar si el usuario es Administrador
+# ==============================================================================
+
+def es_administrador(user):
+    """
+    True si el usuario:
+      - Es superuser de Django (heredado), o
+      - Pertenece al grupo 'Administrador'.
+    Mantenemos esta función centralizada por si mañana cambia la lógica.
+    """
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    return user.groups.filter(name='Administrador').exists()
 
 
 # ==============================================================================
@@ -46,10 +63,18 @@ def _log(request, accion, obj):
 
 
 # ==============================================================================
-# BASE DRY — CSS/JS compartido
+# BASE DRY — CSS/JS compartido + lógica de permisos por rol
 # ==============================================================================
 
 class BaseNexusAdmin(admin.ModelAdmin):
+    """
+    Base para todos los ModelAdmin del proyecto.
+    Por defecto un Operador (no-Administrador) solo puede VER los registros
+    de los modelos que heredan de esta base.
+    EventoAdmin sobreescribe estos métodos porque sí permite crear/editar
+    sus propios eventos.
+    """
+
     class Media:
         css = {
             'all': (
@@ -65,7 +90,33 @@ class BaseNexusAdmin(admin.ModelAdmin):
             'js/modulos/filtros_toggle.js',
         )
 
-    # ── PUNTO 6: Hooks de auditoría CRUD ──────────────────────────
+    # ── Lógica de roles: Operador solo ve, no crea/edita/borra ───
+    # (EventoAdmin sobreescribirá estos métodos)
+    def has_add_permission(self, request):
+        return es_administrador(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        # Permitir abrir la página de detalle en modo lectura.
+        # Django muestra el form pero todos los inputs salen disabled si
+        # readonly_fields cubre todo. Mejor sobreescribir get_readonly_fields.
+        return True if es_administrador(request.user) else False
+
+    def has_delete_permission(self, request, obj=None):
+        return es_administrador(request.user)
+
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Para no-Administradores, TODOS los campos son de solo lectura.
+        Así pueden entrar al registro y ver detalles sin editar nada.
+        """
+        if es_administrador(request.user):
+            return super().get_readonly_fields(request, obj)
+        # Devolver todos los campos del modelo como readonly
+        if obj is not None:
+            return [f.name for f in obj._meta.fields]
+        return super().get_readonly_fields(request, obj)
+
+    # ── Hooks de auditoría CRUD ──────────────────────────────────
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         _log(request, 'EDITAR' if change else 'CREAR', obj)
@@ -154,42 +205,19 @@ class SedeAdmin(BaseNexusAdmin):
 
 # ==============================================================================
 # EVENTO
-# PUNTO 1: Widgets nativos del navegador para fecha y hora
+# PUNTO 1: Calendario Flatpickr y reloj custom (vía reloj.js + flatpickr.js)
 # PUNTO 2: Filtrado dinámico de Idproveedor según Idsede seleccionada
 # PUNTO 5: Permisos por propietario
 # PUNTO 6: Auditoría heredada de BaseNexusAdmin + auto-asignar creado_por
 # ==============================================================================
 
-class EventoForm(forms.ModelForm):
-    """
-    Form personalizado para el Evento.
-    Usa los widgets HTML5 nativos del navegador para fecha y hora:
-        - <input type="date">  → calendario nativo del navegador
-        - <input type="time">  → reloj nativo del navegador
-    Ventajas:
-      - UX consistente con el navegador del operador (Chrome/Edge/Firefox).
-      - No depende del jQuery del admin antiguo de Django.
-      - Mejor accesibilidad y soporte móvil.
-    """
-    class Meta:
-        model  = Evento
-        fields = '__all__'
-        widgets = {
-            'fecha_inicio': forms.SplitDateTimeWidget(
-                date_attrs={'type': 'date', 'class': 'input-fecha-nativo'},
-                time_attrs={'type': 'time', 'class': 'input-hora-nativo', 'step': 60},
-            ),
-            'fecha_fin': forms.SplitDateTimeWidget(
-                date_attrs={'type': 'date', 'class': 'input-fecha-nativo'},
-                time_attrs={'type': 'time', 'class': 'input-hora-nativo', 'step': 60},
-            ),
-        }
-
-
 @admin.register(Evento)
 class EventoAdmin(BaseNexusAdmin):
 
-    form = EventoForm                                       # Punto 1 — widgets nativos
+    # Nota: usamos los widgets clásicos del admin (AdminSplitDateTime)
+    # porque Flatpickr/ClockPicker se enganchan sobre las clases CSS
+    # .vDateField y .vTimeField que esos widgets le ponen al input.
+    # No definimos `form` personalizado para no perder esas clases.
 
     list_display = (
         'get_empresa', 'idsede', 'idproveedor', 'rol',
@@ -219,14 +247,17 @@ class EventoAdmin(BaseNexusAdmin):
                 'css/layout_admin.css',
                 'css/navigation_admin.css',
                 'css/components_admin.css',
-                'css/overrides_admin.css',
+                'css/vendor/flatpickr.min.css',             # Flatpickr CSS
+                'css/overrides_admin.css',                  # último — para que ganen nuestros estilos
             )
         }
         js = (
+            'js/vendor/flatpickr.min.js',                   # Flatpickr core
+            'js/vendor/flatpickr.es.min.js',                # Locale español
             'js/modulos/boton_eliminar.js',
             'js/modulos/filtros_toggle.js',
-            'js/modulos/reloj.js',
-            'js/modulos/evento_proveedores.js',             # Punto 2 — filtro dinámico
+            'js/modulos/reloj.js',                          # debe ir DESPUÉS de flatpickr
+            'js/modulos/evento_proveedores.js',
         )
 
     # ── Empresa en columna ──────────────────────────────────────────
@@ -273,29 +304,49 @@ class EventoAdmin(BaseNexusAdmin):
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    # ── PUNTO 5: Solo ver sus propios eventos (no admins) ──────────
+    # ── Solo ver sus propios eventos (no Administradores) ─────────
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        if request.user.is_superuser:
+        if es_administrador(request.user):
             return qs
-        return qs.filter(creado_por=request.user)
+        return qs
 
-    # ── PUNTO 5: Solo puede editar/eliminar sus propios eventos ────
+    # ── EventoAdmin SOBREESCRIBE las restricciones de BaseNexusAdmin ──
+    # Aquí los Operadores SÍ pueden crear y editar/borrar sus propios.
+
+    def has_add_permission(self, request):
+        # Cualquier usuario autenticado del staff puede CREAR eventos
+        return request.user.is_authenticated
+
     def has_change_permission(self, request, obj=None):
+        # Listado siempre se puede ver
         if obj is None:
             return True
-        if request.user.is_superuser:
+        if es_administrador(request.user):
             return True
+        # Operador: solo edita los SUYOS
         return obj.creado_por == request.user
 
     def has_delete_permission(self, request, obj=None):
         if obj is None:
             return True
-        if request.user.is_superuser:
+        if es_administrador(request.user):
             return True
         return obj.creado_por == request.user
 
-    # ── PUNTO 5 + 6: Auto-asignar creado_por al guardar ────────────
+    def get_readonly_fields(self, request, obj=None):
+        """
+        - Administrador: campos normales (solo creado_por es readonly).
+        - Operador editando un evento ajeno: TODOS los campos readonly.
+        - Operador editando un evento propio: campos normales.
+        """
+        if es_administrador(request.user):
+            return ('creado_por',)
+        if obj is not None and obj.creado_por != request.user:
+            return [f.name for f in obj._meta.fields]
+        return ('creado_por',)
+
+    # ── Auto-asignar creado_por al guardar ─────────────────────────
     def save_model(self, request, obj, form, change):
         if not change:
             obj.creado_por = request.user
@@ -353,4 +404,7 @@ class LogAccionAdmin(admin.ModelAdmin):
         return False  # Nadie puede editar logs
 
     def has_module_perms(self, request):
-        return request.user.is_superuser  # Solo superusuarios ven el módulo
+        return es_administrador(request.user)  # Solo Administradores ven el módulo
+
+    def has_view_permission(self, request, obj=None):
+        return es_administrador(request.user)

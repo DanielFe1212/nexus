@@ -1,63 +1,70 @@
 /**
  * reloj.js
- * Inicializa Flatpickr (calendario) y ClockPicker (reloj) en los campos
- * de fecha/hora del admin de Django. Calcula duración automáticamente.
- */
+ * ------------------------------------------------------------------
+ * Engancha Flatpickr al form de Evento del admin:
+ *   - .vDateField  → calendario en español
+ *   - .vTimeField  → reloj 24h con formato H:i:S (lo que Django espera)
+ *
+ * Adicionalmente, calcula automáticamente la duración (horas y minutos)
+ * cuando ambas fechas/horas están completas.
+ * ------------------------------------------------------------------ */
 
-$(document).ready(function () {
+window.addEventListener('load', function () {
 
-    // ----------------------------------------------------------------
-    // 1. CALENDARIO — Flatpickr en todos los campos .vDateField
-    // ----------------------------------------------------------------
-    $('.vDateField').each(function () {
-        var valorOriginal = this.value;
-        var formato = (valorOriginal && valorOriginal.includes('/')) ? 'd/m/Y' : 'Y-m-d';
+    // Verificamos que Flatpickr cargó correctamente
+    if (typeof flatpickr === 'undefined') {
+        console.warn('[reloj.js] Flatpickr no está cargado. ' +
+                     'Verifica que flatpickr.min.js exista en static/js/vendor/.');
+        return;
+    }
 
-        flatpickr(this, {
-            dateFormat:    formato,
-            locale:        'es',
-            allowInput:    true,
-            disableMobile: true,
-            onChange: calcularDuracion
-        });
+    // 1. EL CALENDARIO (Para las fechas)
+    flatpickr('.vDateField', {
+        dateFormat: 'Y-m-d',
+        locale:     'es',
+        allowInput: true,
+        disableMobile: 'true',
+        onChange:   calcularDuracion
     });
 
-    // ----------------------------------------------------------------
-    // 2. RELOJ — ClockPicker en todos los campos .vTimeField
-    // ----------------------------------------------------------------
-    $('.vTimeField').clockpicker({
-        autoclose:   true,
-        donetext:    'Listo',
-        placement:   'bottom',
-        align:       'left',
-        twelvehour:  false,
-        afterDone:   calcularDuracion
+    // 2. EL RELOJ DE FLATPICKR (Para las horas)
+    flatpickr('.vTimeField', {
+        enableTime:    true,     // Activa el modo de hora
+        noCalendar:    true,     // Apaga el calendario aquí
+        dateFormat:    'H:i:S',  // Formato exacto que pide Django
+        time_24hr:     true,     // Formato 24 horas
+        locale:        'es',
+        allowInput:    true,
+        disableMobile: 'true',
+        onChange:      calcularDuracion
     });
 
-    // ----------------------------------------------------------------
-    // 3. DURACIÓN AUTOMÁTICA
-    //    Lee fecha_inicio + hora_inicio, fecha_fin + hora_fin.
-    //    Escribe duracion_horas y duracion_minutos. Solo lectura.
-    // ----------------------------------------------------------------
+    // 3. CALCULAR duración automáticamente cuando ambos campos están listos
     function calcularDuracion() {
-        var fechaInicioVal = $('input[name="fecha_inicio_0"]').val();
-        var horaInicioVal  = $('input[name="fecha_inicio_1"]').val();
-        var fechaFinVal    = $('input[name="fecha_fin_0"]').val();
-        var horaFinVal     = $('input[name="fecha_fin_1"]').val();
+        var fi = document.querySelector('input[name="fecha_inicio_0"]');
+        var hi = document.querySelector('input[name="fecha_inicio_1"]');
+        var ff = document.querySelector('input[name="fecha_fin_0"]');
+        var hf = document.querySelector('input[name="fecha_fin_1"]');
 
-        if (!fechaInicioVal || !horaInicioVal || !fechaFinVal || !horaFinVal) return;
+        if (!fi || !hi || !ff || !hf) return;
+        if (!fi.value || !hi.value || !ff.value || !hf.value) return;
 
-        // Normalizar formato de fecha (d/m/Y → Y-m-d)
+        // Las fechas pueden venir en formato Y-m-d (flatpickr) o d/m/Y (Django default)
         function normalizarFecha(f) {
-            if (f.includes('/')) {
+            if (f.indexOf('/') !== -1) {
                 var p = f.split('/');
                 return p[2] + '-' + p[1] + '-' + p[0];
             }
             return f;
         }
 
-        var inicio = new Date(normalizarFecha(fechaInicioVal) + 'T' + horaInicioVal + ':00');
-        var fin    = new Date(normalizarFecha(fechaFinVal)    + 'T' + horaFinVal    + ':00');
+        // Si la hora viene sin segundos (H:i), agregamos :00
+        function normalizarHora(h) {
+            return h.length === 5 ? h + ':00' : h;
+        }
+
+        var inicio = new Date(normalizarFecha(fi.value) + 'T' + normalizarHora(hi.value));
+        var fin    = new Date(normalizarFecha(ff.value) + 'T' + normalizarHora(hf.value));
 
         if (isNaN(inicio.getTime()) || isNaN(fin.getTime())) return;
         if (fin <= inicio) return;
@@ -67,29 +74,37 @@ $(document).ready(function () {
         var horas       = Math.floor(diffMinutos / 60);
         var minutos     = diffMinutos % 60;
 
-        var inputHoras   = $('input[name="duracion_horas"]');
-        var inputMinutos = $('input[name="duracion_minutos"]');
+        var iHoras = document.querySelector('input[name="duracion_horas"]');
+        var iMin   = document.querySelector('input[name="duracion_minutos"]');
 
-        // Escribir valores calculados
-        inputHoras.val(horas + 'h ' + minutos + 'm');
-        inputMinutos.val(diffMinutos);
-
-        // Marcar visualmente como solo lectura
-        inputHoras.addClass('campo-solo-lectura');
-        inputMinutos.addClass('campo-solo-lectura');
+        if (iHoras) {
+            iHoras.value = horas + 'h ' + minutos + 'm';
+            iHoras.classList.add('campo-solo-lectura');
+        }
+        if (iMin) {
+            iMin.value = diffMinutos;
+            iMin.classList.add('campo-solo-lectura');
+        }
     }
 
-    // ----------------------------------------------------------------
-    // 4. BLOQUEAR edición manual de duracion_horas y duracion_minutos
-    // ----------------------------------------------------------------
-    $(document).on('keydown paste', 'input[name="duracion_horas"], input[name="duracion_minutos"]', function (e) {
-        e.preventDefault();
-        return false;
+    // 4. Bloquear edición manual de duración
+    document.addEventListener('keydown', function (e) {
+        var t = e.target;
+        if (t && t.matches &&
+            t.matches('input[name="duracion_horas"], input[name="duracion_minutos"]')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    document.addEventListener('paste', function (e) {
+        var t = e.target;
+        if (t && t.matches &&
+            t.matches('input[name="duracion_horas"], input[name="duracion_minutos"]')) {
+            e.preventDefault();
+            return false;
+        }
     });
 
-    // Calcular si ya vienen con valores al cargar (edición de evento existente)
+    // Calcular al cargar (cuando editamos un evento existente)
     calcularDuracion();
-
-    // Recalcular también al cambiar fecha/hora manualmente con input
-    $(document).on('change', '.vDateField, .vTimeField', calcularDuracion);
 });

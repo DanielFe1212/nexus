@@ -2,6 +2,10 @@
 ==============================================================================
 ARCHIVO: models.py
 ==============================================================================
+Notas:
+  - Cada campo tiene `verbose_name` para que el admin muestre etiquetas
+    legibles en lugar de "Idsede", "Idproveedor", etc.
+==============================================================================
 """
 
 from django.db import models
@@ -11,7 +15,7 @@ from django.core.exceptions import ValidationError
 
 class Empresa(models.Model):
     idempresa = models.AutoField(primary_key=True)
-    nombre    = models.CharField(max_length=50, unique=True)
+    nombre    = models.CharField(max_length=50, unique=True, verbose_name="Nombre")
 
     class Meta:
         verbose_name        = "Empresa"
@@ -23,7 +27,7 @@ class Empresa(models.Model):
 
 class Proveedor(models.Model):
     idproveedor = models.AutoField(primary_key=True)
-    nombre      = models.CharField(max_length=50, unique=True)
+    nombre      = models.CharField(max_length=50, unique=True, verbose_name="Nombre")
 
     class Meta:
         verbose_name        = "Proveedor"
@@ -35,10 +39,13 @@ class Proveedor(models.Model):
 
 class Sede(models.Model):
     idsede    = models.AutoField(primary_key=True)
-    idempresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='sedes')
-    nombre    = models.CharField(max_length=50)
-    ciudad    = models.CharField(max_length=30, blank=True, null=True)
-    pais      = models.CharField(max_length=30, blank=True, null=True)
+    idempresa = models.ForeignKey(
+        Empresa, on_delete=models.CASCADE, related_name='sedes',
+        verbose_name="Empresa"
+    )
+    nombre    = models.CharField(max_length=50, verbose_name="Nombre")
+    ciudad    = models.CharField(max_length=30, blank=True, null=True, verbose_name="Ciudad")
+    pais      = models.CharField(max_length=30, blank=True, null=True, verbose_name="País")
 
     canal_primario   = models.ForeignKey(Proveedor, on_delete=models.PROTECT, related_name='sedes_primario',   null=True, blank=True, verbose_name="Canal Primario")
     canal_secundario = models.ForeignKey(Proveedor, on_delete=models.PROTECT, related_name='sedes_secundario', null=True, blank=True, verbose_name="Canal Secundario")
@@ -59,8 +66,8 @@ class Sede(models.Model):
 
 
 class TipoFalla(models.Model):
-    nombre      = models.CharField(max_length=50, unique=True)
-    descripcion = models.TextField(blank=True, null=True)
+    nombre      = models.CharField(max_length=50, unique=True, verbose_name="Nombre")
+    descripcion = models.TextField(blank=True, null=True, verbose_name="Descripción")
 
     class Meta:
         verbose_name        = "Tipo de Falla"
@@ -76,19 +83,26 @@ class Evento(models.Model):
     creado_por: usuario que registró el evento (para control de permisos).
     """
     idevento    = models.AutoField(primary_key=True)
-    idsede      = models.ForeignKey(Sede,      on_delete=models.CASCADE)
-    idproveedor = models.ForeignKey(Proveedor, on_delete=models.CASCADE)
+    idsede      = models.ForeignKey(
+        Sede, on_delete=models.CASCADE, verbose_name="Sede"
+    )
+    idproveedor = models.ForeignKey(
+        Proveedor, on_delete=models.CASCADE, verbose_name="Proveedor"
+    )
 
     ROL_CHOICES = [('Principal', 'Principal'), ('Respaldo', 'Respaldo'), ('MPLS', 'MPLS')]
-    rol = models.CharField(max_length=20, choices=ROL_CHOICES, blank=True, null=True)
+    rol = models.CharField(max_length=20, choices=ROL_CHOICES, blank=True, null=True, verbose_name="Rol")
 
-    fecha_inicio     = models.DateTimeField()
-    fecha_fin        = models.DateTimeField(blank=True, null=True)
-    duracion_horas   = models.FloatField(blank=True, null=True)
-    duracion_minutos = models.IntegerField(blank=True, null=True)
-    idtipo_falla     = models.ForeignKey(TipoFalla, on_delete=models.SET_NULL, null=True, blank=True)
-    ticket_proveedor = models.CharField(max_length=50, blank=True, null=True)
-    observaciones    = models.TextField(blank=True, null=True)
+    fecha_inicio     = models.DateTimeField(verbose_name="Fecha Inicio")
+    fecha_fin        = models.DateTimeField(blank=True, null=True, verbose_name="Fecha Fin")
+    duracion_horas   = models.FloatField(blank=True, null=True, verbose_name="Duración (horas)")
+    duracion_minutos = models.IntegerField(blank=True, null=True, verbose_name="Duración (minutos)")
+    idtipo_falla     = models.ForeignKey(
+        TipoFalla, on_delete=models.SET_NULL, null=True, blank=True,
+        verbose_name="Tipo de Falla"
+    )
+    ticket_proveedor = models.CharField(max_length=50, blank=True, null=True, verbose_name="Ticket Proveedor")
+    observaciones    = models.TextField(blank=True, null=True, verbose_name="Observaciones")
 
     # ── PUNTO 5: control de propiedad ──────────────────────────────
     creado_por = models.ForeignKey(
@@ -130,8 +144,16 @@ class Evento(models.Model):
 
 
 class ConfiguracionGlobal(models.Model):
-    meta_disponibilidad = models.FloatField(default=0.99, help_text="Ejemplo: 0.99 para 99%")
-    minutos_dia         = models.IntegerField(default=1440, help_text="Minutos en un día (24h = 1440)")
+    meta_disponibilidad = models.FloatField(
+        default=0.99,
+        help_text="Ejemplo: 0.99 para 99%",
+        verbose_name="Meta de Disponibilidad"
+    )
+    minutos_dia = models.IntegerField(
+        default=1440,
+        help_text="Minutos en un día (24h = 1440)",
+        verbose_name="Minutos por día"
+    )
 
     class Meta:
         verbose_name        = "Configuración Global"
@@ -146,7 +168,7 @@ class EnlaceDashboard(models.Model):
 
 
 # ==============================================================================
-# PUNTO 6 — AUDITORÍA DE ACCIONES
+# AUDITORÍA DE ACCIONES
 # Registra: login, logout, crear/editar/eliminar evento y cualquier modelo.
 # ==============================================================================
 
@@ -166,13 +188,13 @@ class LogAccion(models.Model):
         ('ELIMINAR', 'Eliminación'),
     ]
 
-    usuario     = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='log_acciones')
-    accion      = models.CharField(max_length=20, choices=ACCION_CHOICES)
-    modelo      = models.CharField(max_length=50, blank=True, null=True, help_text="Nombre del modelo afectado")
-    objeto_id   = models.CharField(max_length=50, blank=True, null=True, help_text="ID del objeto afectado")
-    descripcion = models.TextField(blank=True, null=True, help_text="Detalle legible de la acción")
-    ip          = models.GenericIPAddressField(null=True, blank=True)
-    fecha       = models.DateTimeField(auto_now_add=True)
+    usuario     = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='log_acciones', verbose_name="Usuario")
+    accion      = models.CharField(max_length=20, choices=ACCION_CHOICES, verbose_name="Acción")
+    modelo      = models.CharField(max_length=50, blank=True, null=True, help_text="Nombre del modelo afectado", verbose_name="Modelo")
+    objeto_id   = models.CharField(max_length=50, blank=True, null=True, help_text="ID del objeto afectado", verbose_name="ID del Objeto")
+    descripcion = models.TextField(blank=True, null=True, help_text="Detalle legible de la acción", verbose_name="Descripción")
+    ip          = models.GenericIPAddressField(null=True, blank=True, verbose_name="Dirección IP")
+    fecha       = models.DateTimeField(auto_now_add=True, verbose_name="Fecha y Hora")
 
     class Meta:
         verbose_name        = "Log de Acción"
