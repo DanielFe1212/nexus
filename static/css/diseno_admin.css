@@ -118,3 +118,36 @@ html, body {
 }
 
 #branding h1 { display: none !important; }
+
+/* ── CAMBIOS SOLICITADOS ─────────────────────────────────────────────────────*/
+
+/* 1) Contorno visible al cuadro — 4 bordes negros + fondo blanco explícito */
+#login {
+    background: #ffffff !important;
+    border-top:    1px solid #000000 !important;
+    border-left:   1px solid #000000 !important;
+    border-right:  1px solid #000000 !important;
+    border-bottom: 2px solid #000000 !important;
+}
+
+/* 2) Quitar línea negra debajo del botón */
+#login .submit-row,
+.submit-row {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+
+/* 3) Exterior verde — container y content transparentes para mostrar el gradiente del body */
+.login #container {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.login #content {
+    background: transparent !important;
+}
+
+html body.login {
+    background: linear-gradient(160deg, #a8d5be 0%, #c9e8d5 40%, #e8f5ee 100%) !important;
+}
