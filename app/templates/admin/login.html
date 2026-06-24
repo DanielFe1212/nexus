@@ -5,4 +5,87 @@
     {{ block.super }}
     <link rel="stylesheet" type="text/css" href="{% static 'css/base_admin.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/diseno_admin.css' %}">
+    <style>
+        .password-wrapper {
+            position: relative;
+            display: block;
+            width: 100%;
+        }
+        .password-wrapper input {
+            padding-right: 38px !important;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            line-height: 1;
+            color: #64748b;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toggle-password:hover { color: #10b981; }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <script>
+    (function () {
+        function initToggle() {
+            var pwd = document.getElementById('id_password');
+            if (!pwd) return;
+            if (pwd.parentElement.classList.contains('password-wrapper')) return;
+
+            var wrapper = document.createElement('span');
+            wrapper.className = 'password-wrapper';
+            pwd.parentNode.insertBefore(wrapper, pwd);
+            wrapper.appendChild(pwd);
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'toggle-password';
+            btn.setAttribute('aria-label', 'Mostrar u ocultar contrasena');
+
+            var SVG_OJO_ABIERTO =
+                '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" ' +
+                'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>' +
+                '<circle cx="12" cy="12" r="3"></circle>' +
+                '</svg>';
+
+            var SVG_OJO_TACHADO =
+                '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" ' +
+                'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>' +
+                '<circle cx="12" cy="12" r="3"></circle>' +
+                '<line x1="2" y1="2" x2="22" y2="22"></line>' +
+                '</svg>';
+
+            btn.innerHTML = SVG_OJO_ABIERTO;
+            wrapper.appendChild(btn);
+
+            btn.addEventListener('click', function () {
+                if (pwd.type === 'password') {
+                    pwd.type = 'text';
+                    btn.innerHTML = SVG_OJO_TACHADO;
+                } else {
+                    pwd.type = 'password';
+                    btn.innerHTML = SVG_OJO_ABIERTO;
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initToggle);
+        } else {
+            initToggle();
+        }
+    })();
+    </script>
 {% endblock %}

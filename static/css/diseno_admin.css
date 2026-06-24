@@ -119,35 +119,58 @@ html, body {
 
 #branding h1 { display: none !important; }
 
-/* ── CAMBIOS SOLICITADOS ─────────────────────────────────────────────────────*/
 
-/* 1) Contorno visible al cuadro — 4 bordes negros + fondo blanco explícito */
-#login {
+/* ── CAMBIOS SOLICITADOS ─────────────────────────────────────────────────────
+   El rectángulo negro debe envolver TODO el bloque (header verde con logo +
+   campos + botón), no solo el formulario. Eso es el #container de Django.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* 1) Rectángulo negro alrededor de TODO el bloque (#container) con fondo blanco */
+.login #container {
+    border: 2px solid #000000 !important;
     background: #ffffff !important;
-    border-top:    1px solid #000000 !important;
-    border-left:   1px solid #000000 !important;
-    border-right:  1px solid #000000 !important;
-    border-bottom: 2px solid #000000 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    max-width: 440px !important;
+    width: fit-content !important;
+    margin: 60px auto !important;
+    overflow: hidden !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: block !important;
 }
 
-/* 2) Quitar línea negra debajo del botón */
+/* El header (logo Grupo Carval) conserva su degradado verde dentro del cuadro */
+.login #header {
+    background: linear-gradient(90deg, #e5e7eb 0%, #10b981 100%) !important;
+}
+
+/* El contenido interno del cuadro: fondo blanco, sin bordes propios */
+.login #content,
+.login #content-main {
+    background: #ffffff !important;
+    padding-top: 20px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: none !important;
+}
+
+/* El formulario #login pierde su borde propio (el borde lo da el #container) */
+#login {
+    background: #ffffff !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 24px 36px 32px !important;
+}
+
+/* Quitar línea negra debajo del botón */
 #login .submit-row,
 .submit-row {
     border-bottom: none !important;
     padding-bottom: 0 !important;
 }
 
-/* 3) Exterior verde — container y content transparentes para mostrar el gradiente del body */
-.login #container {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-.login #content {
-    background: transparent !important;
-}
-
+/* Exterior del cuadro: verde (gradiente del body) */
 html body.login {
     background: linear-gradient(160deg, #a8d5be 0%, #c9e8d5 40%, #e8f5ee 100%) !important;
 }

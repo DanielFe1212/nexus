@@ -324,3 +324,14 @@ body.filtros-ocultos #result_list {
 #btn-toggle-filtros[aria-expanded="true"] {
     background: var(--color-primary) !important;
 }
+
+/* ==================================================================
+   Botón "Grabar" — quitar mayúsculas forzadas
+   ==================================================================
+   El CSS nativo de Django (forms.css) aplica text-transform:uppercase
+   al botón primario (.submit-row input.default), por eso se ve "GRABAR".
+   Lo dejamos en capitalización normal: "Grabar".
+   ================================================================== */
+.submit-row input.default {
+    text-transform: none !important;
+}

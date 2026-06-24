@@ -2,18 +2,49 @@
 ==============================================================================
 ARCHIVO: settings.py
 ==============================================================================
+Las variables sensibles (SECRET_KEY, credenciales de base de datos, DEBUG,
+ALLOWED_HOSTS) se leen desde un archivo .env que NO se sube al repositorio.
+Ver .env.example para la plantilla de configuración.
+==============================================================================
 """
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent
 
-SECRET_KEY = 'django-insecure-_-3-uxdw_&bqggnpovk=tg^6+s&z5r7ax=dypm=dx_f+jul5*@'
+# Cargar variables de entorno desde el archivo .env (en la raíz del proyecto)
+load_dotenv(BASE_DIR / '.env')
 
-DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ── Utilidades para leer variables de entorno ─────────────────────────────
+def env(clave, defecto=None):
+    """Devuelve la variable de entorno o un valor por defecto."""
+    return os.environ.get(clave, defecto)
+
+def env_bool(clave, defecto=False):
+    """Interpreta una variable de entorno como booleano."""
+    valor = os.environ.get(clave)
+    if valor is None:
+        return defecto
+    return valor.strip().lower() in ('1', 'true', 'yes', 'on', 'si', 'sí')
+
+def env_list(clave, defecto=None):
+    """Interpreta una variable separada por comas como lista."""
+    valor = os.environ.get(clave)
+    if not valor:
+        return defecto or []
+    return [item.strip() for item in valor.split(',') if item.strip()]
+
+
+# ── Seguridad ─────────────────────────────────────────────────────────────
+SECRET_KEY = env('SECRET_KEY', 'django-insecure-CAMBIAME-en-el-archivo-env')
+
+DEBUG = env_bool('DEBUG', False)
+
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', ['127.0.0.1', 'localhost'])
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -56,20 +87,24 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'wsgi.application'
 
+
+# ── Base de datos (SQL Server) ─────────────────────────────────────────────
+# Todas las credenciales se leen del .env
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'nexus_db',
-        'USER': 'daniel',
-        'PASSWORD': '123456',
-        'HOST': 'DANIEL',
-        'PORT': '',
+        'ENGINE':   'mssql',
+        'NAME':     env('DB_NAME', 'nexus_db'),
+        'USER':     env('DB_USER', ''),
+        'PASSWORD': env('DB_PASSWORD', ''),
+        'HOST':     env('DB_HOST', 'localhost'),
+        'PORT':     env('DB_PORT', ''),
         'OPTIONS': {
-            'driver': 'ODBC Driver 18 for SQL Server',
-            'extra_params': 'TrustServerCertificate=yes;Encrypt=yes;',
+            'driver': env('DB_DRIVER', 'ODBC Driver 18 for SQL Server'),
+            'extra_params': env('DB_EXTRA_PARAMS', 'TrustServerCertificate=yes;Encrypt=yes;'),
         },
     }
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -87,7 +122,7 @@ STATIC_URL       = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT      = os.path.join(BASE_DIR, 'staticfiles')
 
-# ── PUNTO 7: Caché en memoria (LocMemCache) ───────────────────────────────
+# ── Caché en memoria (LocMemCache) ────────────────────────────────────────
 # Para escalar a Redis en producción, cambia el BACKEND a:
 # 'django.core.cache.backends.redis.RedisCache' y agrega LOCATION
 CACHES = {
